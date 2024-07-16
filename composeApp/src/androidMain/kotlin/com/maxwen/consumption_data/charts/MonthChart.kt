@@ -1,5 +1,7 @@
 package com.maxwen.consumption_data.charts
 
+import com.maxwen.consumption.models.Period
+
 class MonthChart(private val monthData: MutableMap<String, MutableMap<String, ChartConsumption>> = mutableMapOf(),
                  private var minAmount: Double = Double.MAX_VALUE, private var maxAmount: Double = Double.MIN_VALUE
 ) {
@@ -31,8 +33,12 @@ class MonthChart(private val monthData: MutableMap<String, MutableMap<String, Ch
         return monthData[year]?.keys?.sorted() ?: mutableListOf<String>()
     }
 
-    private fun monthConsumption(year: String, month: String): ChartConsumption? {
+    fun monthConsumption(year: String, month: String): ChartConsumption? {
         return monthData[year]?.get(month)
+    }
+
+    fun monthConsumption(period: Period): ChartConsumption? {
+        return monthData[period.year()]?.get(period.month())
     }
 
     fun yearData(year: String): List<ChartConsumption?> {

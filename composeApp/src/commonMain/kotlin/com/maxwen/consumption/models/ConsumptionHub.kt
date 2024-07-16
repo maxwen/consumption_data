@@ -20,7 +20,6 @@ class ConsumptionHub {
         ServerException::class
     )
     suspend fun load(baseUrl: String, username: String, password: String) {
-        println(baseUrl + " " + username + " " + password)
         val client = EedConsumptionApi(baseUrl, username, password)
         var offset = 0
         val limit = 20
@@ -197,7 +196,7 @@ class ConsumptionHub {
                 sumAmount += it.amount!!
                 numAmount += 1
             }
-            return String.format("%.2f", sumAmount / numAmount).toDouble()
+            return "%.2f".format(sumAmount / numAmount).toDouble()
         }
         return null
     }
@@ -213,7 +212,7 @@ class ConsumptionHub {
             consumptions.filter { it.amount != null && !it.errors }.forEach {
                 sumAmount += it.amount!!
             }
-            return sumAmount
+            return "%.2f".format(sumAmount).toDouble()
         }
         return null
     }

@@ -8,6 +8,9 @@ data class Period(val period: String) {
         fun make(year: String, month: Int): Period {
             return Period("$year-%02d".format(month))
         }
+        fun month(month: Int): String {
+            return "%02d".format(month)
+        }
     }
 
     fun year(): String {
