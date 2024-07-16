@@ -11,8 +11,8 @@ class ConsumptionHub {
     private val unitData: MutableMap<String, MutableMap<String, ConsumptionDataBillingUnit>> =
         mutableMapOf()
 
-    suspend fun load() {
-        val client = EedConsumptionApi("http://192.168.1.70:8080", "foo", "bar")
+    suspend fun load(baseUrl: String, username: String, password: String) {
+        val client = EedConsumptionApi(baseUrl, username, password)
         var offset = 0
         val limit = 20
         while (true) {

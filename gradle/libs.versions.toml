@@ -20,6 +20,7 @@ ktorVersion = "2.3.10"
 androidx-lifecycle = "2.8.0-rc03"
 material3Android = "1.2.1"
 navigationCompose = "2.7.0-alpha07"
+datastore = "1.1.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -44,6 +45,8 @@ ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktorVer
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 
+datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
+datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -6,6 +6,7 @@ import com.maxwen.consumption.models.ConsumptionEntity
 import com.maxwen.consumption.models.ConsumptionHub
 import com.maxwen.consumption.models.ConsumptionSelector
 import com.maxwen.consumption.models.Period
+import com.maxwen.consumption.models.Settings
 import com.maxwen.consumption_data.charts.ChartConsumption
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openapitools.client.apis.EedConsumptionApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.update
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.openapitools.client.models.BillingUnitReference
@@ -29,13 +31,41 @@ class MainViewModel : ViewModel() {
     private val data = ConsumptionHub()
     private val _squashResidentialUnits = MutableStateFlow(false)
     val squashResidentialUnits: StateFlow<Boolean> = _squashResidentialUnits.asStateFlow()
+    val password = MutableStateFlow("")
+    val username = MutableStateFlow("")
+    val baseurl = MutableStateFlow("")
 
     init {
         viewModelScope.launch {
-            data.load()
+            data.load(Settings.getBaseUrl(), Settings.getUsername(), Settings.getPasword())
+            password.update { Settings.getPasword() }
+            username.update { Settings.getUsername() }
+            baseurl.update { Settings.getBaseUrl() }
             _loaded.value = true
         }
     }
+
+    fun setBaseUrl(value: String) {
+        baseurl.update { value }
+        viewModelScope.launch {
+            Settings.setBaseUrl(value)
+        }
+    }
+
+    fun setPassword(value: String) {
+        password.update { value }
+        viewModelScope.launch {
+            Settings.setPassword(value)
+        }
+    }
+
+    fun setUsername(value: String) {
+        username.update { value }
+        viewModelScope.launch {
+            Settings.setUsername(value)
+        }
+    }
+
 
     fun setSelector(selector: ConsumptionSelector) {
         _selector.value = selector

@@ -52,6 +52,9 @@ kotlin {
             implementation(libs.ktor.client.auth)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.navigation.compose)
+
+            api(libs.datastore.preferences)
+            api(libs.datastore)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

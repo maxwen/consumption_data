@@ -18,15 +18,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.AddCircle
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -34,15 +38,29 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -51,14 +69,21 @@ import androidx.navigation.compose.rememberNavController
 import com.maxwen.consumption.models.ConsumptionEntity
 import com.maxwen.consumption.models.ConsumptionSelector
 import com.maxwen.consumption.models.Period
+import com.maxwen.consumption.models.Settings
 import com.maxwen.consumption_data.charts.ChartConsumption
 import com.maxwen.consumption_data.charts.MonthChart
 import com.maxwen.consumption_data.charts.YearChart
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import org.openapitools.client.models.ServiceConfigurationBillingUnit
+import createDataStore
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 enum class Screens() {
     BillingUnitsScreen,
     ConsumptionScreen,
+    SettingsScreen
 }
 
 class MainActivity() : ComponentActivity() {
@@ -69,13 +94,20 @@ class MainActivity() : ComponentActivity() {
 
         setContent {
             MaterialTheme {
-                App()
+                App(prefs = remember {
+                    createDataStore(applicationContext)
+                })
             }
         }
     }
 
     @Composable
-    fun App(navController: NavHostController = rememberNavController()) {
+    fun App(
+        navController: NavHostController = rememberNavController(),
+        prefs: DataStore<Preferences>
+    ) {
+        Settings.myDataStore = prefs
+
         // Get current back stack entry
         val backStackEntry by navController.currentBackStackEntryAsState()
         // Get the name of the current screen
@@ -84,6 +116,7 @@ class MainActivity() : ComponentActivity() {
         )
         Scaffold(topBar = {
             AppBar(
+                navController,
                 currentScreen = currentScreen,
                 canNavigateBack = navController.previousBackStackEntry != null,
                 navigateUp = { navController.navigateUp() }
@@ -101,7 +134,7 @@ class MainActivity() : ComponentActivity() {
                         viewModel,
                         navController,
                         modifier = Modifier
-                            .fillMaxHeight()
+                            .fillMaxSize()
                             .padding(10.dp)
                     )
                 }
@@ -110,7 +143,16 @@ class MainActivity() : ComponentActivity() {
                         viewModel,
                         navController,
                         modifier = Modifier
-                            .fillMaxHeight()
+                            .fillMaxSize()
+                            .padding(10.dp)
+                    )
+                }
+                composable(route = Screens.SettingsScreen.name) {
+                    SettingsScreen(
+                        viewModel,
+                        navController,
+                        modifier = Modifier
+                            .fillMaxSize()
                             .padding(10.dp)
                     )
                 }
@@ -122,6 +164,7 @@ class MainActivity() : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBar(
+    navHostController: NavHostController,
     currentScreen: Screens,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
@@ -142,8 +185,71 @@ fun AppBar(
                     )
                 }
             }
+        },
+        actions = {
+            IconButton(onClick = { navHostController.navigate(Screens.SettingsScreen.name) }) {
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = "Settings"
+                )
+            }
+
         }
     )
+}
+
+@Composable
+fun SettingsScreen(
+    viewModel: MainViewModel,
+    navHostController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier) {
+        val baseUrl by viewModel.baseurl.collectAsState()
+        val username by viewModel.username.collectAsState()
+        val password by viewModel.password.collectAsState()
+
+        var passwordVisibility by remember { mutableStateOf(false) }
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = baseUrl,
+            onValueChange = {
+                viewModel.setBaseUrl(it)
+            },
+            label = { Text("Url") })
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = username,
+            onValueChange = {
+                viewModel.setUsername(it)
+            },
+            label = { Text("Username") })
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = password,
+            onValueChange = {
+                viewModel.setPassword(it)
+            },
+            label = { Text("Password") },
+            trailingIcon = {
+                IconButton(onClick = {
+                    passwordVisibility = !passwordVisibility
+                }) {
+                    Icon(
+                        imageVector = Icons.Outlined.AddCircle,
+                        contentDescription = null
+                    )
+                }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password
+            ),
+            visualTransformation = if (passwordVisibility) VisualTransformation.None
+            else PasswordVisualTransformation()
+        )
+    }
+
 }
 
 @Composable
@@ -286,9 +392,9 @@ fun HorizontalBar(
     Row(
         modifier
             .width(screenFraction)
-            .height(50.dp)
+            .height(40.dp)
             .clip(RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp))
-            .padding(10.dp)
+            .padding(5.dp)
             .background(
                 color,
                 shape = RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp)
