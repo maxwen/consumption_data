@@ -2,6 +2,8 @@ package com.maxwen.consumption.models
 
 import io.ktor.client.statement.*
 import org.openapitools.client.apis.EedConsumptionApi
+import org.openapitools.client.infrastructure.ClientException
+import org.openapitools.client.infrastructure.ServerException
 import org.openapitools.client.infrastructure.isInformational
 import org.openapitools.client.models.*
 
@@ -11,7 +13,14 @@ class ConsumptionHub {
     private val unitData: MutableMap<String, MutableMap<String, ConsumptionDataBillingUnit>> =
         mutableMapOf()
 
+    @Throws(
+        IllegalStateException::class,
+        UnsupportedOperationException::class,
+        ClientException::class,
+        ServerException::class
+    )
     suspend fun load(baseUrl: String, username: String, password: String) {
+        println(baseUrl + " " + username + " " + password)
         val client = EedConsumptionApi(baseUrl, username, password)
         var offset = 0
         val limit = 20

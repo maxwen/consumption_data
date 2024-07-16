@@ -1,5 +1,6 @@
 package com.maxwen.consumption_data
 
+import MainViewModel
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.AddCircle
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -116,6 +118,7 @@ class MainActivity() : ComponentActivity() {
         )
         Scaffold(topBar = {
             AppBar(
+                viewModel,
                 navController,
                 currentScreen = currentScreen,
                 canNavigateBack = navController.previousBackStackEntry != null,
@@ -164,6 +167,7 @@ class MainActivity() : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBar(
+    viewModel: MainViewModel,
     navHostController: NavHostController,
     currentScreen: Screens,
     canNavigateBack: Boolean,
@@ -187,13 +191,22 @@ fun AppBar(
             }
         },
         actions = {
-            IconButton(onClick = { navHostController.navigate(Screens.SettingsScreen.name) }) {
-                Icon(
-                    imageVector = Icons.Outlined.Settings,
-                    contentDescription = "Settings"
-                )
+            if (currentScreen == Screens.BillingUnitsScreen) {
+                IconButton(onClick = { viewModel.reload() }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Refresh,
+                        contentDescription = "Refresh"
+                    )
+                }
             }
-
+            if (currentScreen != Screens.SettingsScreen) {
+                IconButton(onClick = { navHostController.navigate(Screens.SettingsScreen.name) }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = "Settings"
+                    )
+                }
+            }
         }
     )
 }
@@ -259,6 +272,7 @@ fun BillingUnitsScreen(
     modifier: Modifier = Modifier
 ) {
     val loaded by viewModel.loaded.collectAsState()
+    val loadError by viewModel.loadError.collectAsState()
     val squashResidentialUnits by viewModel.squashResidentialUnits.collectAsState()
 
     Column(
@@ -311,7 +325,20 @@ fun BillingUnitsScreen(
                 }
             }
         }
+        if (loadError) {
+            LoadErrorScreen(viewModel, modifier)
+        }
     }
+}
+
+@Composable
+fun LoadErrorScreen(
+    viewModel: MainViewModel,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        "Load error", fontWeight = FontWeight.Bold, fontSize = 18.sp
+    )
 }
 
 @Composable
