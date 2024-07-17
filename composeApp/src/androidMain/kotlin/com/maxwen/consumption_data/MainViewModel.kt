@@ -129,8 +129,8 @@ class MainViewModel : ViewModel() {
         return data.getBillingUnits()
     }
 
-    fun getBillingUntitReferences(): List<BillingUnitReference> {
-        return data.getBillingUnitReferences()
+    fun getBillingUnitData(mscnumber: String): ServiceConfigurationBillingUnit? {
+        return data.getBillingUnitData(mscnumber)
     }
 
     fun getBillingUntitServices(mscnumber: String): Set<Service> {

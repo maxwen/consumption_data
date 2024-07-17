@@ -5,13 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -41,12 +39,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.core.DataStore
@@ -61,9 +57,11 @@ import com.maxwen.consumption.models.ConsumptionSelector
 import com.maxwen.consumption.models.Period
 import com.maxwen.consumption.models.Settings
 import com.maxwen.consumption_data.charts.ChartConsumption
-import com.maxwen.consumption_data.charts.HorizontalBar
+import com.maxwen.consumption_data.charts.HorizontalMonthChart
+import com.maxwen.consumption_data.charts.HorizontalYearChart
 import com.maxwen.consumption_data.charts.MonthChartData
-import com.maxwen.consumption_data.charts.VerticalBar
+import com.maxwen.consumption_data.charts.VerticalMonthChart
+import com.maxwen.consumption_data.charts.VerticalYearChart
 import com.maxwen.consumption_data.charts.YearChartData
 import org.openapitools.client.models.ServiceConfigurationBillingUnit
 import createDataStore
@@ -448,6 +446,7 @@ fun BillingUnitCard(
             modifier = Modifier.padding(15.dp)
         ) {
             Text("Billing unit $mscnumber")
+            Text("Start period " + (billingUnit.servicestart ?: ""))
             Text("Last period " + (billingUnit.lastperiod ?: ""))
             val service = selector.service
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -488,84 +487,12 @@ fun BillingUnitCard(
 }
 
 @Composable
-fun VerticalMonthChart(
-    monthChart: MonthChartData,
-    years: List<String>,
-    modifier: Modifier = Modifier
-) {
-    val yearColors = listOf<Color>(Color(209, 25, 25), Color(25, 170, 209), Color(25, 170, 25))
-
-    Text(
-        years.joinToString(separator = ","),
-        fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
-        modifier = Modifier.height(50.dp)
-    )
-
-    val maxAmount = monthChart.maxAmount()
-    BoxWithConstraints(
-        modifier
-            .fillMaxWidth()
-    ) {
-        val barWith = ((maxWidth / 12) / years.size)
-        Row(
-            modifier
-                .fillMaxWidth()
-        ) {
-            for (month in 1..12) {
-                var i = 0
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Row {
-                        years.forEach { year ->
-                            val chartConsumption =
-                                monthChart.monthConsumption(Period.make(year, month))
-                            if (chartConsumption == null) {
-                                VerticalBar(
-                                    "",
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    yearColors[year.toInt() % yearColors.size],
-                                    barWith
-                                )
-                            } else {
-                                VerticalBar(
-                                    chartConsumption.label,
-                                    chartConsumption.amount,
-                                    0.0,
-                                    maxAmount,
-                                    yearColors[year.toInt() % yearColors.size],
-                                    barWith
-                                )
-                            }
-                            i += 1
-                        }
-                    }
-                    Text(
-                        Period.month(month),
-                        modifier = Modifier.padding(top = 5.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun VerticalChart(
     viewModel: MainViewModel,
-    navHostController: NavHostController,
     selector: ConsumptionSelector,
     consumptions: List<ConsumptionEntity>,
-    modifier: Modifier = Modifier
 ) {
-    val yearColors = listOf<Color>(Color(209, 25, 25), Color(25, 170, 209), Color(25, 170, 25))
-
-    Text(
-        "Years", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.height(50.dp)
-    )
     val years = viewModel.yearListOfConsumptionData(selector)
-    // TODO vertical should be limited to max 4 years
     val yearChart = YearChartData()
     years.forEach { year ->
         val sum = viewModel.yearSumConsumptionOfUnit(selector, year)
@@ -583,46 +510,7 @@ fun VerticalChart(
         )
     }
 
-    val maxBarWidth = 50.dp
-
-    val barWith = maxBarWidth
-    Row(
-        modifier
-            .fillMaxWidth()
-    ) {
-        Spacer(modifier = Modifier.weight(1.0f))
-        yearChart.sortedYears().forEach { year ->
-            val chartConsumption = yearChart.yearData(year)
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Row {
-                    if (chartConsumption == null) {
-                        VerticalBar(
-                            "",
-                            0.0,
-                            0.0,
-                            0.0,
-                            yearColors[year.toInt() % yearColors.size],
-                            barWith
-                        )
-                    } else {
-                        VerticalBar(
-                            chartConsumption.label,
-                            chartConsumption.amount,
-                            0.0,
-                            yearChart.maxAmount(),
-                            yearColors[year.toInt() % yearColors.size],
-                            barWith
-                        )
-                    }
-                }
-                Text(
-                    year,
-                    modifier = Modifier.padding(top = 5.dp)
-                )
-            }
-            Spacer(modifier = Modifier.weight(1.0f))
-        }
-    }
+    VerticalYearChart(yearChart)
 
     val monthChart = MonthChartData()
     consumptions.forEach { consumption ->
@@ -652,76 +540,11 @@ fun VerticalChart(
 }
 
 @Composable
-fun HorizontalMonthChart(
-    monthChart: MonthChartData,
-    years: List<String>,
-    maxBarHeight: Dp,
-    modifier: Modifier = Modifier
-) {
-    val yearColors = listOf<Color>(Color(209, 25, 25), Color(25, 170, 209), Color(25, 170, 25))
-
-    Text(
-        years.joinToString(separator = ","),
-        fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
-        modifier = Modifier.height(50.dp)
-    )
-    val maxAmount = monthChart.maxAmount()
-    val barHeight = (maxBarHeight / years.size)
-    Column(
-        modifier
-            .fillMaxWidth()
-    ) {
-        for (month in 1..12) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    Period.month(month),
-                    modifier = Modifier.padding(end = 5.dp)
-                )
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    years.forEach { year ->
-                        val chartConsumption =
-                            monthChart.monthConsumption(Period.make(year, month))
-                        if (chartConsumption == null) {
-                            HorizontalBar(
-                                "",
-                                0.0,
-                                0.0,
-                                0.0,
-                                yearColors[year.toInt() % yearColors.size],
-                                barHeight
-                            )
-                        } else {
-                            HorizontalBar(
-                                chartConsumption.label,
-                                chartConsumption.amount,
-                                0.0,
-                                maxAmount,
-                                yearColors[year.toInt() % yearColors.size],
-                                barHeight
-                            )
-                        }
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-    }
-}
-
-@Composable
 fun HorizontalChart(
     viewModel: MainViewModel,
-    navHostController: NavHostController,
     selector: ConsumptionSelector,
     consumptions: List<ConsumptionEntity>,
-    modifier: Modifier = Modifier
 ) {
-    val yearColors = listOf<Color>(Color(209, 25, 25), Color(25, 170, 209), Color(25, 170, 25))
-
-    Text(
-        "Years", fontWeight = FontWeight.Bold, fontSize = 18.sp
-    )
     val years = viewModel.yearListOfConsumptionData(selector)
     val yearChart = YearChartData()
     years.forEach { year ->
@@ -740,41 +563,7 @@ fun HorizontalChart(
         )
     }
 
-    val maxBarHeight = 50.dp
-    Column(
-        modifier
-            .fillMaxWidth()
-    ) {
-        yearChart.sortedYears().forEach { year ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    year,
-                    modifier = Modifier.padding(end = 5.dp)
-                )
-                val chartConsumption = yearChart.yearData(year)
-                if (chartConsumption == null) {
-                    HorizontalBar(
-                        "",
-                        0.0,
-                        0.0,
-                        0.0,
-                        yearColors[year.toInt() % yearColors.size],
-                        maxBarHeight
-                    )
-                } else {
-                    HorizontalBar(
-                        chartConsumption.label,
-                        chartConsumption.amount,
-                        0.0,
-                        yearChart.maxAmount(),
-                        yearColors[year.toInt() % yearColors.size],
-                        maxBarHeight
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-    }
+    HorizontalYearChart(yearChart)
 
     val monthChart = MonthChartData()
     consumptions.forEach { consumption ->
@@ -816,7 +605,7 @@ fun ConsumptionScreen(
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
     ) {
-        HorizontalChart(viewModel, navHostController, selector, consumptions)
-        VerticalChart(viewModel, navHostController, selector, consumptions)
+        HorizontalChart(viewModel, selector, consumptions)
+        VerticalChart(viewModel, selector, consumptions)
     }
 }

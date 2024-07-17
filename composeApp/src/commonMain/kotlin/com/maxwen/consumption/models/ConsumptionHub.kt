@@ -60,10 +60,8 @@ class ConsumptionHub {
         return list
     }
 
-    fun getBillingUnitReferences(): List<BillingUnitReference> {
-        val list = mutableListOf<BillingUnitReference>()
-        this.billingunits.values.forEach { list.add(it.reference) }
-        return list
+    fun getBillingUnitData(mscnumber: String) : ServiceConfigurationBillingUnit? {
+        return billingunits[mscnumber]
     }
 
     fun getBillingUnitServices(mscnumber: String): Set<Service> {
