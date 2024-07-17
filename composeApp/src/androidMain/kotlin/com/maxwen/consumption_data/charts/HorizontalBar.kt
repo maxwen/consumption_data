@@ -1,5 +1,6 @@
 package com.maxwen.consumption_data.charts
 
+import androidx.annotation.Px
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,6 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -27,14 +34,13 @@ fun HorizontalBar(
     maxAmount: Double,
     color: Color,
     maxHeight: Dp,
+    maxWith: Dp,
+    showAmount: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
-    val screenWidth = configuration.screenWidthDp.dp
 
     val offset = 0.dp
-    val screenRange = screenWidth - offset
+    val screenRange = maxWith - offset
     val amountRange = maxAmount - minAmount
     val amountFraction = if (amount == 0.0) {
         0.0
@@ -42,6 +48,15 @@ fun HorizontalBar(
         (amount - minAmount) / amountRange
     }
     val screenFraction = offset + Dp((screenRange.value * amountFraction).toFloat())
+    val availSpace = maxWith - screenFraction
+
+    val textMeasurer = rememberTextMeasurer()
+    val textLayoutResult: TextLayoutResult =
+        textMeasurer.measure(
+            text = amount.toString()
+        )
+    val textSize = textLayoutResult.size.width
+    val amountInline = with(LocalDensity.current) { availSpace.toPx() } < textSize * 1.5
 
     Row(
         modifier
@@ -50,23 +65,25 @@ fun HorizontalBar(
     ) {
         Row(
             modifier
+                .width(screenFraction)
                 .height(maxHeight)
+                .padding(1.dp)
+                .clip(RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp))
+                .background(
+                    color,
+                    shape = RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp)
+                ),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier
-                    .width(screenFraction)
-                    .height(maxHeight)
-                    .padding(1.dp)
-                    .clip(RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp))
-                    .background(
-                        color,
-                        shape = RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp)
-                    ),
-            )
-            Spacer(modifier = Modifier.weight(1.0F))
+            if (showAmount && amountInline) {
+                Spacer(modifier = Modifier.weight(1.0F))
+                Text(amount.toString(), modifier = Modifier.padding(end = 5.dp))
+            }
         }
-//        if (amount != 0.0) {
-//            Text(amount.toString(), modifier = Modifier.padding(end = 5.dp))
-//        }
+        if (showAmount && !amountInline) {
+            Text(amount.toString(), modifier = Modifier.padding(start = 5.dp))
+        }
+
+        Spacer(modifier = Modifier.weight(1.0F))
     }
 }

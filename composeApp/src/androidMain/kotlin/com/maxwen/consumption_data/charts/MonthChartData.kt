@@ -1,11 +1,13 @@
 package com.maxwen.consumption_data.charts
 
 import com.maxwen.consumption.models.Period
+import org.openapitools.client.models.Service
+import org.openapitools.client.models.UnitOfMeasure
 
 class MonthChartData(private val monthData: MutableMap<String, MutableMap<String, ChartConsumption>> = mutableMapOf(),
-                     private var minAmount: Double = Double.MAX_VALUE, private var maxAmount: Double = Double.MIN_VALUE
+                     private var minAmount: Double = Double.MAX_VALUE, private var maxAmount: Double = Double.MIN_VALUE,
+                     val service: Service, val unitOfMeassure: UnitOfMeasure
 ) {
-
     fun addConsumption(year: String, month: String, consumption: ChartConsumption) {
         var yearData = monthData[year]
         if (yearData == null) {

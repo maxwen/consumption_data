@@ -493,7 +493,7 @@ fun VerticalChart(
     consumptions: List<ConsumptionEntity>,
 ) {
     val years = viewModel.yearListOfConsumptionData(selector)
-    val yearChart = YearChartData()
+    val yearChart = YearChartData(service = selector.service, unitOfMeassure = consumptions.first().unitofmeasure)
     years.forEach { year ->
         val sum = viewModel.yearSumConsumptionOfUnit(selector, year)
         val chartConsumption = ChartConsumption(
@@ -501,6 +501,7 @@ fun VerticalChart(
             year,
             year,
             selector.service,
+            consumptions.first().unitofmeasure,
             selector.billingUnit,
             selector.residentialUnit
         )
@@ -512,7 +513,7 @@ fun VerticalChart(
 
     VerticalYearChart(yearChart)
 
-    val monthChart = MonthChartData()
+    val monthChart = MonthChartData(service = selector.service, unitOfMeassure = consumptions.first().unitofmeasure)
     consumptions.forEach { consumption ->
         val period = Period(consumption.period)
         monthChart.addConsumption(
@@ -521,6 +522,7 @@ fun VerticalChart(
                 period.month(),
                 consumption.period,
                 selector.service,
+                consumption.unitofmeasure,
                 selector.billingUnit,
                 selector.residentialUnit
             )
@@ -546,7 +548,7 @@ fun HorizontalChart(
     consumptions: List<ConsumptionEntity>,
 ) {
     val years = viewModel.yearListOfConsumptionData(selector)
-    val yearChart = YearChartData()
+    val yearChart = YearChartData(service = selector.service, unitOfMeassure = consumptions.first().unitofmeasure)
     years.forEach { year ->
         val sum = viewModel.yearSumConsumptionOfUnit(selector, year)
         val chartConsumption = ChartConsumption(
@@ -554,6 +556,7 @@ fun HorizontalChart(
             year,
             year,
             selector.service,
+            consumptions.first().unitofmeasure,
             selector.billingUnit,
             selector.residentialUnit
         )
@@ -565,7 +568,7 @@ fun HorizontalChart(
 
     HorizontalYearChart(yearChart)
 
-    val monthChart = MonthChartData()
+    val monthChart = MonthChartData(service = selector.service, unitOfMeassure = consumptions.first().unitofmeasure)
     consumptions.forEach { consumption ->
         val period = Period(consumption.period)
         monthChart.addConsumption(
@@ -574,6 +577,7 @@ fun HorizontalChart(
                 period.month(),
                 consumption.period,
                 selector.service,
+                consumption.unitofmeasure,
                 selector.billingUnit,
                 selector.residentialUnit
             )

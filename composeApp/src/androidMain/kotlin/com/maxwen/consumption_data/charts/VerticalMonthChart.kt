@@ -41,6 +41,7 @@ fun VerticalMonthChart(
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
         )
+        Text(text = monthChart.unitOfMeassure.toString(), modifier = Modifier.padding(top = 10.dp))
 
         val maxAmount = monthChart.maxAmount()
         BoxWithConstraints(
@@ -87,7 +88,8 @@ fun VerticalMonthChart(
                                         0.0,
                                         0.0,
                                         yearColors[year.toInt() % yearColors.size],
-                                        barWith
+                                        barWith,
+                                        false
                                     )
                                 } else {
                                     VerticalBar(
@@ -96,7 +98,8 @@ fun VerticalMonthChart(
                                         0.0,
                                         maxAmount,
                                         yearColors[year.toInt() % yearColors.size],
-                                        barWith
+                                        barWith,
+                                        years.size == 1
                                     )
                                 }
                                 i += 1
