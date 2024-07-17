@@ -1,7 +1,7 @@
 package com.maxwen.consumption_data.charts
 
 
-class YearChart(
+class YearChartData(
     private val yearData: MutableMap<String, ChartConsumption> = mutableMapOf(),
     private var minAmount: Double = Double.MAX_VALUE, private var maxAmount: Double = Double.MIN_VALUE
 ) {

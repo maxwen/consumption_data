@@ -11,6 +11,21 @@ object Settings {
     private val BASEURL = stringPreferencesKey("baseurl")
     private val USERNAME = stringPreferencesKey("username")
     private val PASSWORD = stringPreferencesKey("password")
+    private val SETUP  = intPreferencesKey("setup")
+
+    suspend fun setSetupDone() {
+        Result.runCatching {
+            myDataStore.edit { settings ->
+                settings[SETUP] = 1
+            }
+        }
+    }
+
+    suspend fun isSetupDone(): Boolean {
+        val settings = myDataStore.data.first().toPreferences()
+        val value = settings[SETUP] ?: 0
+        return value == 1
+    }
 
 
     suspend fun setBaseUrl(value: String) {
