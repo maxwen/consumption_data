@@ -27,7 +27,7 @@ fun VerticalMonthChart(
     years: List<String>,
     modifier: Modifier = Modifier
 ) {
-    val yearColors = listOf<Color>(Color(209, 25, 25), Color(25, 170, 209), Color(25, 170, 25))
+    val yearColors = ChartProperties.yearColors
     val yearLabelHeight = 20.dp
     val gridLineColor = MaterialTheme.colorScheme.onBackground
 

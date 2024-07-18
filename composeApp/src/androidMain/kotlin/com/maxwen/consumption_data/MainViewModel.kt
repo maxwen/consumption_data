@@ -71,16 +71,11 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun resetLoadStatus() {
-        _loadError.value = false
-        _loaded.value = false
-    }
-
     fun isSetupDone(): Boolean {
         return isSetupDone.value
     }
 
-    fun setSetupDone() {
+    private fun setSetupDone() {
         if (!isSetupDone()) {
             isSetupDone.update { true }
             viewModelScope.launch {
@@ -144,49 +139,40 @@ class MainViewModel : ViewModel() {
 
     fun getConsumptionOfUnit(
         selector: ConsumptionSelector,
-        periodStart: String? = null,
-        periodEnd: String? = null
     ): List<ConsumptionEntity> {
         val consumptions = mutableListOf<ConsumptionEntity>()
-        data.consumptionOfTypeOfUnit(selector, periodStart, periodEnd)
+        data.consumptionOfTypeOfUnit(selector)
             ?.let { consumptions.addAll(it) }
         return consumptions;
     }
 
     fun minConsumptionOfUnit(
         selector: ConsumptionSelector,
-        periodStart: String? = null,
-        periodEnd: String? = null
     ): Pair<String, Double>? {
-        return data.minConsumptionOfTypeOfUnit(selector, periodStart, periodEnd)
+        return data.minConsumptionOfTypeOfUnit(selector)
     }
 
     fun maxConsumptionOfUnit(
         selector: ConsumptionSelector,
-        periodStart: String? = null,
-        periodEnd: String? = null
     ): Pair<String, Double>? {
-        return data.maxConsumptionOfTypeOfUnit(selector, periodStart, periodEnd)
+        return data.maxConsumptionOfTypeOfUnit(selector)
     }
 
     fun avgConsumptionOfUnit(
         selector: ConsumptionSelector,
-        periodStart: String? = null,
-        periodEnd: String? = null
     ): Double? {
-        return data.avgConsumptionOfTypeOfUnit(selector, periodStart, periodEnd)
+        return data.avgConsumptionOfTypeOfUnit(selector)
     }
 
     fun sumConsumptionOfUnit(
         selector: ConsumptionSelector,
-        periodStart: String? = null,
-        periodEnd: String? = null
     ): Double? {
-        return data.sumConsumptionOfTypeOfUnit(selector, periodStart, periodEnd)
+        return data.sumConsumptionOfTypeOfUnit(selector)
     }
 
     fun yearSumConsumptionOfUnit(selector: ConsumptionSelector, year: String): Double? {
-        return data.sumConsumptionOfTypeOfUnit(selector, "$year-01", "$year-12")
+        val selectorPeriod = ConsumptionSelector(selector.billingUnit, selector.service, selector.residentialUnit, "$year-01", "$year-12")
+        return data.sumConsumptionOfTypeOfUnit(selectorPeriod)
     }
 
     fun yearListOfConsumptionData(selector: ConsumptionSelector): List<String> {

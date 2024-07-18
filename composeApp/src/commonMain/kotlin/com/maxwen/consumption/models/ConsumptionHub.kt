@@ -64,6 +64,14 @@ class ConsumptionHub {
         return billingunits[mscnumber]
     }
 
+    fun getBillingUnitServiceStart(mscnumber: String) : String? {
+        return billingunits[mscnumber]?.servicestart
+    }
+
+    fun getBillingUnitLastPeriod(mscnumber: String) : String? {
+        return billingunits[mscnumber]?.lastperiod
+    }
+
     fun getBillingUnitServices(mscnumber: String): Set<Service> {
         val set = mutableSetOf<Service>()
         unitData[mscnumber]?.forEach { billingUnitData ->
@@ -88,8 +96,6 @@ class ConsumptionHub {
 
     fun consumptionOfTypeOfUnit(
         selector: ConsumptionSelector,
-        periodStart: String? = null,
-        periodEnd: String? = null
     ): List<ConsumptionEntity>? {
         val mscnumber = selector.billingUnit.mscnumber
         val service = selector.service
@@ -99,11 +105,11 @@ class ConsumptionHub {
             val consumptions = mutableListOf<ConsumptionEntity>()
             unitData[mscnumber]?.keys?.forEach { period ->
                 var outOfPeriod = false
-                if (periodStart != null) {
-                    outOfPeriod = period < periodStart
+                if (selector.periodStart != null) {
+                    outOfPeriod = period < selector.periodStart!!
                 }
-                if (periodEnd != null && !outOfPeriod) {
-                    outOfPeriod = period > periodEnd
+                if (selector.periodEnd != null && !outOfPeriod) {
+                    outOfPeriod = period > selector.periodEnd!!
                 }
                 if (!outOfPeriod) {
                     val billingUnitData = unitData[mscnumber]?.get(period)
@@ -143,10 +149,8 @@ class ConsumptionHub {
 
     fun minConsumptionOfTypeOfUnit(
         selector: ConsumptionSelector,
-        periodStart: String? = null,
-        periodEnd: String? = null
     ): Pair<String, Double>? {
-        val consumptions = consumptionOfTypeOfUnit(selector, periodStart, periodEnd)
+        val consumptions = consumptionOfTypeOfUnit(selector)
         if (consumptions?.isNotEmpty() == true) {
             var minPeriod = ""
             var minAmount = Double.MAX_VALUE
@@ -163,10 +167,8 @@ class ConsumptionHub {
 
     fun maxConsumptionOfTypeOfUnit(
         selector: ConsumptionSelector,
-        periodStart: String? = null,
-        periodEnd: String? = null
     ): Pair<String, Double>? {
-        val consumptions = consumptionOfTypeOfUnit(selector, periodStart, periodEnd)
+        val consumptions = consumptionOfTypeOfUnit(selector)
         if (consumptions?.isNotEmpty() == true) {
             var minPeriod = ""
             var maxAmount = Double.MIN_VALUE
@@ -183,10 +185,8 @@ class ConsumptionHub {
 
     fun avgConsumptionOfTypeOfUnit(
         selector: ConsumptionSelector,
-        periodStart: String? = null,
-        periodEnd: String? = null
     ): Double? {
-        val consumptions = consumptionOfTypeOfUnit(selector, periodStart, periodEnd)
+        val consumptions = consumptionOfTypeOfUnit(selector)
         if (consumptions?.isNotEmpty() == true) {
             var sumAmount = 0.0
             var numAmount = 0
@@ -201,10 +201,8 @@ class ConsumptionHub {
 
     fun sumConsumptionOfTypeOfUnit(
         selector: ConsumptionSelector,
-        periodStart: String? = null,
-        periodEnd: String? = null
     ): Double? {
-        val consumptions = consumptionOfTypeOfUnit(selector, periodStart, periodEnd)
+        val consumptions = consumptionOfTypeOfUnit(selector)
         if (consumptions?.isNotEmpty() == true) {
             var sumAmount = 0.0
             consumptions.filter { it.amount != null && !it.errors }.forEach {

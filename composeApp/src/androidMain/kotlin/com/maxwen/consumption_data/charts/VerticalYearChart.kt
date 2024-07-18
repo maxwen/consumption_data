@@ -27,7 +27,7 @@ fun VerticalYearChart(
     yearChart: YearChartData,
     modifier: Modifier = Modifier
 ) {
-    val yearColors = listOf<Color>(Color(209, 25, 25), Color(25, 170, 209), Color(25, 170, 25))
+    val yearColors = ChartProperties.yearColors
 
     val barWith = 40.dp
     val gridLineColor = MaterialTheme.colorScheme.onBackground

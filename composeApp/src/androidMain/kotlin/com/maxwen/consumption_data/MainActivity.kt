@@ -310,41 +310,52 @@ fun BillingUnitsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 viewModel.getBillingUnits().forEach { billingUnit ->
-                    viewModel.getBillingUntitServices(billingUnit.reference.mscnumber)
-                        .forEach { service ->
-                            if (squashResidentialUnits) {
-                                val selector =
-                                    ConsumptionSelector(
-                                        billingUnit.reference,
-                                        service,
-                                        null
-                                    )
+                    val serviceStart = billingUnit.servicestart
+                    val lastUpdate = billingUnit.lastperiod
+                    if (serviceStart != null && lastUpdate != null) {
 
-                                BillingUnitCard(
-                                    viewModel,
-                                    navHostController,
-                                    billingUnit,
-                                    selector
-                                )
-                            } else {
-                                viewModel.getBillingUntitResidentialUnits(billingUnit.reference.mscnumber)
-                                    .forEach { residentialUnit ->
-                                        val selector =
-                                            ConsumptionSelector(
-                                                billingUnit.reference,
-                                                service,
-                                                residentialUnit
-                                            )
+                        // TODO here we can limit to max years before
+                        val periodStart =
+                            Period.make((Period(lastUpdate).yearInt() - 1).toString(), 1).period
 
-                                        BillingUnitCard(
-                                            viewModel,
-                                            navHostController,
-                                            billingUnit,
-                                            selector
+                        viewModel.getBillingUntitServices(billingUnit.reference.mscnumber)
+                            .forEach { service ->
+                                if (squashResidentialUnits) {
+                                    val selector =
+                                        ConsumptionSelector(
+                                            billingUnit.reference,
+                                            service,
+                                            null,
+                                            periodStart = serviceStart
                                         )
-                                    }
+
+                                    BillingUnitCard(
+                                        viewModel,
+                                        navHostController,
+                                        billingUnit,
+                                        selector
+                                    )
+                                } else {
+                                    viewModel.getBillingUntitResidentialUnits(billingUnit.reference.mscnumber)
+                                        .forEach { residentialUnit ->
+                                            val selector =
+                                                ConsumptionSelector(
+                                                    billingUnit.reference,
+                                                    service,
+                                                    residentialUnit,
+                                                    periodStart = serviceStart
+                                                )
+
+                                            BillingUnitCard(
+                                                viewModel,
+                                                navHostController,
+                                                billingUnit,
+                                                selector
+                                            )
+                                        }
+                                }
                             }
-                        }
+                    }
                 }
             }
         } else if (loadError) {

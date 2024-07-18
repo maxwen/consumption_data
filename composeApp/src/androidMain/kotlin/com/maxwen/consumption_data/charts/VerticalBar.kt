@@ -2,6 +2,7 @@ package com.maxwen.consumption_data.charts
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -74,7 +75,8 @@ fun VerticalBar(
         )
     val textSize = textLayoutResult.size
     val amountInline = with(LocalDensity.current) { availSpace.toPx() } < textSize.width * 1.5
-    val textColor = MaterialTheme.colorScheme.onBackground
+    // TODO
+    val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
 
     Column(
         modifier

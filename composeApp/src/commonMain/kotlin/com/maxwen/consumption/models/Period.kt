@@ -22,6 +22,10 @@ data class Period(val period: String) {
         }
     }
 
+    fun yearInt(): Int {
+        return year().toInt()
+    }
+
     fun month(): String {
         val parts = period.split("-");
         return if (parts.size == 2) {
@@ -29,5 +33,12 @@ data class Period(val period: String) {
         } else {
             "0"
         }
+    }
+    fun monthInt(): Int {
+        return month().toInt()
+    }
+
+    override fun toString(): String {
+        return period
     }
 }

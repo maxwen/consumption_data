@@ -33,7 +33,7 @@ fun HorizontalYearChart(
     yearChart: YearChartData,
     modifier: Modifier = Modifier
 ) {
-    val yearColors = listOf<Color>(Color(209, 25, 25), Color(25, 170, 209), Color(25, 170, 25))
+    val yearColors = ChartProperties.yearColors
     val barHeight = 40.dp
     val gridLineColor = MaterialTheme.colorScheme.onBackground
     val yearLabelWith = 45.dp
