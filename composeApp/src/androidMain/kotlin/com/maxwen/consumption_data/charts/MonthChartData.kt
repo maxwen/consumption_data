@@ -3,6 +3,7 @@ package com.maxwen.consumption_data.charts
 import com.maxwen.consumption.models.Period
 import org.openapitools.client.models.Service
 import org.openapitools.client.models.UnitOfMeasure
+import kotlin.math.pow
 
 class MonthChartData(private val monthData: MutableMap<String, MutableMap<String, ChartConsumption>> = mutableMapOf(),
                      private var minAmount: Double = Double.MAX_VALUE, private var maxAmount: Double = Double.MIN_VALUE,
@@ -80,5 +81,16 @@ class MonthChartData(private val monthData: MutableMap<String, MutableMap<String
 
     fun maxAmount(): Double {
         return maxAmount
+    }
+
+    fun scaleUnit() : Double {
+        var amountScale = maxAmount
+        var divNum = 0
+        while (amountScale / 10 > 1) {
+            divNum++
+            amountScale /= 10
+        }
+        val scaleUnit = 10.toDouble().pow(divNum)
+        return scaleUnit
     }
 }

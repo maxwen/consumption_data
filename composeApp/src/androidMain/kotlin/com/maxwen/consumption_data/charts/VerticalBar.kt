@@ -47,21 +47,18 @@ fun VerticalBar(
     maxAmount: Double,
     color: Color,
     maxWith: Dp,
+    maxHeight: Dp,
     showAmount: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val chartHeight = 320.dp
-    val chartHeightMax = 300.dp
-    val offset = 0.dp
-    val screenRange = chartHeightMax - offset
     val amountRange = maxAmount - minAmount
     val amountFraction = if (amount == 0.0) {
         0.0
     } else {
         (amount - minAmount) / amountRange
     }
-    val screenFraction = offset + Dp((screenRange.value * amountFraction).toFloat())
-    val availSpace = chartHeight - screenFraction
+    val screenFraction =  Dp((maxHeight.value * amountFraction).toFloat())
+    val availSpace = maxHeight - screenFraction
 
     val textMeasurer = rememberTextMeasurer()
     val fontSize = 16.sp
@@ -75,13 +72,12 @@ fun VerticalBar(
         )
     val textSize = textLayoutResult.size
     val amountInline = with(LocalDensity.current) { availSpace.toPx() } < textSize.width * 1.5
-    // TODO
-    val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+    val textColor = MaterialTheme.colorScheme.onBackground
 
     Column(
         modifier
             .width(maxWith)
-            .height(chartHeight),
+            .height(maxHeight),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.weight(1.0f))
@@ -114,10 +110,10 @@ fun VerticalBar(
             modifier
                 .width(maxWith)
                 .height(screenFraction)
-                .padding(1.dp)
-                .clip(RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp))
+                .padding(start = 1.dp, end = 1.dp)
                 .background(
                     color,
+                    shape = RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp)
                 ),
         ) {
             if (showAmount && amountInline) {

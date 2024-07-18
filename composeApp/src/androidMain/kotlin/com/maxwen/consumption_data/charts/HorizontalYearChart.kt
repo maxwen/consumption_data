@@ -9,24 +9,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ui.theme.AppTheme
 
 @Composable
 fun HorizontalYearChart(
@@ -35,11 +27,21 @@ fun HorizontalYearChart(
 ) {
     val yearColors = ChartProperties.yearColors
     val barHeight = 40.dp
-    val gridLineColor = MaterialTheme.colorScheme.onBackground
     val yearLabelWith = 45.dp
+    val gridMainLineProperties = gridMainLineProperties()
+    val gridScaleineProperties = gridScaleLineProperties()
 
     BoxWithConstraints {
         val barWith = maxWidth - yearLabelWith
+        val maxAmount = yearChart.maxAmount()
+        val scaleUnit = yearChart.scaleUnit()
+        val scaleUnitFraction = if (scaleUnit == 0.0) {
+            0.0
+        } else {
+            scaleUnit / maxAmount
+        }
+        val scaleUnitWith = Dp((barWith.value * scaleUnitFraction).toFloat())
+
         Column(
             modifier
                 .fillMaxWidth()
@@ -57,15 +59,33 @@ fun HorizontalYearChart(
                     .padding(top = 10.dp)
                     .drawWithContent {
                         drawLine(
-                            strokeWidth = 1.dp.toPx(),
-                            color = gridLineColor,
+                            strokeWidth = gridMainLineProperties.first,
+                            color = gridMainLineProperties.second,
                             start = Offset(x = yearLabelWith.toPx(), y = 0f),
                             end = Offset(x = yearLabelWith.toPx(), y = size.height),
                         )
+                        var scaleUnitLine = yearLabelWith.toPx()
+                        while (scaleUnitLine + scaleUnitWith.toPx() < size.width) {
+                            scaleUnitLine += scaleUnitWith.toPx()
+
+                            drawLine(
+                                strokeWidth = gridScaleineProperties.first,
+                                color = gridScaleineProperties.second,
+                                start = Offset(
+                                    x = scaleUnitLine,
+                                    y = 0f
+                                ),
+                                end = Offset(
+                                    x = scaleUnitLine,
+                                    y = size.height
+                                ),
+                                pathEffect = getScaleLinePathEffect()
+                            )
+                        }
 
                         drawLine(
-                            strokeWidth = 1.dp.toPx(),
-                            color = gridLineColor,
+                            strokeWidth = gridMainLineProperties.first,
+                            color = gridMainLineProperties.second,
                             start = Offset(x = yearLabelWith.toPx(), y = size.height),
                             end = Offset(
                                 x = size.width,
@@ -99,7 +119,7 @@ fun HorizontalYearChart(
                                 chartConsumption.label,
                                 chartConsumption.amount,
                                 0.0,
-                                yearChart.maxAmount(),
+                                maxAmount,
                                 yearColors[year.toInt() % yearColors.size],
                                 barHeight,
                                 barWith,

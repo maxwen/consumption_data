@@ -37,7 +37,8 @@ class MainViewModel : ViewModel() {
     val password = MutableStateFlow("")
     val username = MutableStateFlow("")
     val baseurl = MutableStateFlow("")
-    private val isSetupDone = MutableStateFlow(true)
+    private val _isSetupDone = MutableStateFlow(true)
+    val isSetupDone: StateFlow<Boolean> = _isSetupDone.asStateFlow()
     private val _isConfigComplete = MutableStateFlow(false)
     val isConfigComplete: StateFlow<Boolean> = _isConfigComplete.asStateFlow()
 
@@ -46,14 +47,16 @@ class MainViewModel : ViewModel() {
             password.update { Settings.getPasword() }
             username.update { Settings.getUsername() }
             baseurl.update { Settings.getBaseUrl() }
-            isSetupDone.update { Settings.isSetupDone() }
+            _isSetupDone.update { Settings.isSetupDone() }
             _isConfigComplete.update { isConfigComplete() }
 
             try {
                 data.load(baseurl.value, username.value, password.value)
-                _loaded.value = true
+                _loaded.update { true }
             } catch (e: Throwable) {
-                _loadError.value = true
+                if (isConfigComplete.value) {
+                    _loadError.update { true }
+                }
             }
         }
     }
@@ -61,23 +64,25 @@ class MainViewModel : ViewModel() {
     fun reload() {
         viewModelScope.launch {
             try {
+                _loadError.update { false }
                 data.load(baseurl.value, username.value, password.value)
-                _loadError.value = false
-                _loaded.value = true
+                _loaded.update { true }
             } catch (e: Throwable) {
-                _loadError.value = true
-                _loaded.value = false
+                if (isConfigComplete.value) {
+                    _loadError.update { true }
+                }
+                _loaded.update { false }
             }
         }
     }
 
-    fun isSetupDone(): Boolean {
-        return isSetupDone.value
+    fun resetLoadError() {
+        _loadError.update { false }
     }
 
     private fun setSetupDone() {
-        if (!isSetupDone()) {
-            isSetupDone.update { true }
+        if (!_isSetupDone.value) {
+            _isSetupDone.update { true }
             viewModelScope.launch {
                 Settings.setSetupDone()
             }
@@ -171,7 +176,13 @@ class MainViewModel : ViewModel() {
     }
 
     fun yearSumConsumptionOfUnit(selector: ConsumptionSelector, year: String): Double? {
-        val selectorPeriod = ConsumptionSelector(selector.billingUnit, selector.service, selector.residentialUnit, "$year-01", "$year-12")
+        val selectorPeriod = ConsumptionSelector(
+            selector.billingUnit,
+            selector.service,
+            selector.residentialUnit,
+            "$year-01",
+            "$year-12"
+        )
         return data.sumConsumptionOfTypeOfUnit(selectorPeriod)
     }
 

@@ -39,15 +39,13 @@ fun HorizontalBar(
     modifier: Modifier = Modifier
 ) {
 
-    val offset = 0.dp
-    val screenRange = maxWith - offset
     val amountRange = maxAmount - minAmount
     val amountFraction = if (amount == 0.0) {
         0.0
     } else {
         (amount - minAmount) / amountRange
     }
-    val screenFraction = offset + Dp((screenRange.value * amountFraction).toFloat())
+    val screenFraction =  Dp((maxWith.value * amountFraction).toFloat())
     val availSpace = maxWith - screenFraction
 
     val textMeasurer = rememberTextMeasurer()
@@ -67,8 +65,7 @@ fun HorizontalBar(
             modifier
                 .width(screenFraction)
                 .height(maxHeight)
-                .padding(1.dp)
-                .clip(RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp))
+                .padding(top = 1.dp, bottom = 1.dp)
                 .background(
                     color,
                     shape = RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp)

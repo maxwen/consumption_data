@@ -2,6 +2,7 @@ package com.maxwen.consumption_data.charts
 
 import org.openapitools.client.models.Service
 import org.openapitools.client.models.UnitOfMeasure
+import kotlin.math.pow
 
 
 class YearChartData(
@@ -33,6 +34,17 @@ class YearChartData(
 
     fun maxAmount(): Double {
         return maxAmount
+    }
+
+    fun scaleUnit() : Double {
+        var amountScale = maxAmount
+        var divNum = 0
+        while (amountScale / 10 > 1) {
+            divNum++
+            amountScale /= 10
+        }
+        val scaleUnit = 10.toDouble().pow(divNum)
+        return scaleUnit
     }
 
 }

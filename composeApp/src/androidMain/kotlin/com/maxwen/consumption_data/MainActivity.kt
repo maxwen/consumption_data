@@ -285,7 +285,6 @@ fun SettingsScreen(
             }
         }
     }
-
 }
 
 @Composable
@@ -296,13 +295,17 @@ fun BillingUnitsScreen(
 ) {
     val loaded by viewModel.loaded.collectAsState()
     val loadError by viewModel.loadError.collectAsState()
+    val isSetupDone by viewModel.isSetupDone.collectAsState()
+
     val squashResidentialUnits by viewModel.squashResidentialUnits.collectAsState()
 
     Column(
         modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (loaded) {
+        if (!isSetupDone) {
+            SetupScreen(viewModel, navHostController, modifier)
+        } else if (loaded) {
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -359,11 +362,10 @@ fun BillingUnitsScreen(
                 }
             }
         } else if (loadError) {
-            if (!viewModel.isSetupDone()) {
-                SetupScreen(viewModel, navHostController, modifier)
-            } else {
-                LoadErrorScreen(viewModel, navHostController, modifier)
-            }
+            LoadErrorScreen(viewModel, navHostController, modifier)
+        } else {
+            //back from setgtings without test
+            viewModel.reload()
         }
     }
 }

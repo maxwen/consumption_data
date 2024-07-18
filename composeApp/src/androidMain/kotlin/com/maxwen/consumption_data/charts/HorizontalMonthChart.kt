@@ -4,20 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -32,8 +27,9 @@ fun HorizontalMonthChart(
     modifier: Modifier = Modifier
 ) {
     val yearColors = ChartProperties.yearColors
-    val gridLineColor = MaterialTheme.colorScheme.onBackground
     val monthLabelWith = 40.dp
+    val gridMainLineProperties = gridMainLineProperties()
+    val gridScaleineProperties = gridScaleLineProperties()
 
     BoxWithConstraints {
         val barWith = maxWidth - monthLabelWith
@@ -50,21 +46,46 @@ fun HorizontalMonthChart(
             )
             val maxAmount = monthChart.maxAmount()
             val barHeight = (maxBarHeight / years.size)
+            val scaleUnit = monthChart.scaleUnit()
+            val scaleUnitFraction = if (scaleUnit == 0.0) {
+                0.0
+            } else {
+                scaleUnit / maxAmount
+            }
+            val scaleUnitWith = Dp((barWith.value * scaleUnitFraction).toFloat())
+
             Column(
                 modifier
                     .fillMaxWidth()
                     .padding(top = 10.dp)
                     .drawWithContent {
                         drawLine(
-                            strokeWidth = 1.dp.toPx(),
-                            color = gridLineColor,
+                            strokeWidth = gridMainLineProperties.first,
+                            color = gridMainLineProperties.second,
                             start = Offset(x = monthLabelWith.toPx(), y = 0f),
                             end = Offset(x = monthLabelWith.toPx(), y = size.height),
                         )
+                        var scaleUnitLine = monthLabelWith.toPx()
+                        while (scaleUnitLine + scaleUnitWith.toPx() < size.width) {
+                            scaleUnitLine += scaleUnitWith.toPx()
 
+                            drawLine(
+                                strokeWidth = gridScaleineProperties.first,
+                                color = gridScaleineProperties.second,
+                                start = Offset(
+                                    x = scaleUnitLine,
+                                    y = 0f
+                                ),
+                                end = Offset(
+                                    x = scaleUnitLine,
+                                    y = size.height
+                                ),
+                                pathEffect = getScaleLinePathEffect()
+                            )
+                        }
                         drawLine(
-                            strokeWidth = 1.dp.toPx(),
-                            color = gridLineColor,
+                            strokeWidth = gridMainLineProperties.first,
+                            color = gridMainLineProperties.second,
                             start = Offset(x = monthLabelWith.toPx(), y = size.height),
                             end = Offset(
                                 x = size.width,
@@ -110,7 +131,6 @@ fun HorizontalMonthChart(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
             Row(
