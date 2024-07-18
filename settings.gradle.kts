@@ -1,4 +1,4 @@
-rootProject.name = "KotlinProject"
+rootProject.name = "consumption_data"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
