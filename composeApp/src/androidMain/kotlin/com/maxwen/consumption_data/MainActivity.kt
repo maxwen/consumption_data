@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,8 +14,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -22,6 +25,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -44,8 +48,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -54,6 +61,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.NavHostController
@@ -67,6 +76,7 @@ import com.maxwen.consumption.models.ConsumptionSelector
 import com.maxwen.consumption.models.Period
 import com.maxwen.consumption.models.Settings
 import com.maxwen.consumption_data.charts.ChartConsumption
+import com.maxwen.consumption_data.charts.ChartProperties
 import com.maxwen.consumption_data.charts.HorizontalMonthChart
 import com.maxwen.consumption_data.charts.HorizontalYearChart
 import com.maxwen.consumption_data.charts.MonthChartData
@@ -84,6 +94,7 @@ import org.jetbrains.compose.resources.vectorResource
 import org.openapitools.client.models.Service
 import org.openapitools.client.models.UnitOfMeasure
 import ui.theme.AppTheme
+import kotlin.math.min
 
 enum class Screens() {
     BillingUnitsScreen,
@@ -150,8 +161,11 @@ class MainActivity() : ComponentActivity() {
                 composable(route = Screens.ConsumptionScreen.name) {
                     val consumptions = viewModel.getConsumptionOfUnit(viewModel.getSelector())
                     val years = viewModel.yearListOfConsumptionData(viewModel.getSelector())
-                    // TODO we can really only show 4 years on a phoen in portrait
-                    viewModel.setShowYears(years)
+
+                    viewModel.setShowYears(
+                        years.reversed().subList(0, min(MainViewModel.MAX_SHOW_YEARS, years.size))
+                            .reversed()
+                    )
                     ConsumptionScreen(
                         viewModel,
                         navController,
@@ -519,7 +533,7 @@ fun BillingUnitCard(
 
     OutlinedCard(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
         ),
         modifier = modifier
             .fillMaxWidth()
@@ -599,9 +613,9 @@ fun VerticalChart(
     viewModel: MainViewModel,
     selector: ConsumptionSelector,
     consumptions: List<ConsumptionEntity>,
+    years: List<String>,
     showYears: List<String>
 ) {
-    val years = viewModel.yearListOfConsumptionData(selector)
     val yearChart = YearChartData(
         service = selector.service,
         unitOfMeassure = consumptions.first().unitofmeasure
@@ -665,9 +679,9 @@ fun HorizontalChart(
     viewModel: MainViewModel,
     selector: ConsumptionSelector,
     consumptions: List<ConsumptionEntity>,
+    years: List<String>,
     showYears: List<String>
 ) {
-    val years = viewModel.yearListOfConsumptionData(selector)
     val yearChart = YearChartData(
         service = selector.service,
         unitOfMeassure = consumptions.first().unitofmeasure
@@ -726,6 +740,37 @@ fun HorizontalChart(
 }
 
 @Composable
+fun PopupBox(
+    showPopup: Boolean,
+    onClickOutside: () -> Unit,
+    content: @Composable() () -> Unit
+) {
+
+    if (showPopup) {
+        // popup
+        Popup(
+            alignment = Alignment.Center,
+            properties = PopupProperties(
+                excludeFromSystemGesture = true,
+            ),
+            // to dismiss on click outside
+            onDismissRequest = { onClickOutside() }
+        ) {
+            Column(
+                Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(10.dp, 10.dp, 10.dp, 10.dp)
+                    ),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                content()
+            }
+        }
+    }
+}
+
+@Composable
 fun ConsumptionScreen(
     viewModel: MainViewModel,
     navHostController: NavHostController,
@@ -738,8 +783,11 @@ fun ConsumptionScreen(
     val showYears by viewModel.showYears.collectAsState()
     val showYearsCopy = mutableListOf<String>()
     showYearsCopy.addAll(showYears)
+    var showYearPopup by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val yearColors = ChartProperties.yearColors
 
-//    println("ConsumptionScreen")
     Column(
         modifier
             .fillMaxWidth()
@@ -768,19 +816,36 @@ fun ConsumptionScreen(
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
+        if (years.size > MainViewModel.MAX_SHOW_YEARS) {
+            Text(
+                text = "You can only show " + MainViewModel.MAX_SHOW_YEARS + " years",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+        }
         Row(modifier = modifier.fillMaxWidth()) {
-            for (year in years) {
+            for (year in years.reversed().subList(0, min(MainViewModel.MAX_SHOW_YEARS, years.size))
+                .reversed()) {
                 val inShowYEars = showYearsCopy.contains(year)
+                val yearButtonColors = ButtonColors(
+                    yearColors[year.toInt() % yearColors.size] /*uttonDefaults.buttonColors().containerColor*/,
+                    MaterialTheme.colorScheme.onBackground,
+                    ButtonDefaults.buttonColors().disabledContainerColor,
+                    ButtonDefaults.buttonColors().disabledContentColor
+                )
+
                 Button(
                     shape = if (inShowYEars) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
-                    colors = if (inShowYEars) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+                    colors = if (inShowYEars) yearButtonColors else ButtonDefaults.filledTonalButtonColors(),
                     elevation = if (inShowYEars) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
                     onClick = {
                         if (showYearsCopy.contains(year)) {
                             showYearsCopy.remove(year)
                         } else {
-                            showYearsCopy.add(year)
-                            showYearsCopy.sort()
+                            if (showYearsCopy.size < MainViewModel.MAX_SHOW_YEARS) {
+                                showYearsCopy.add(year)
+                                showYearsCopy.sort()
+                            }
                         }
                         viewModel.setShowYears(showYearsCopy)
                     }) {
@@ -790,8 +855,70 @@ fun ConsumptionScreen(
                 }
                 Spacer(modifier = Modifier.width(10.dp))
             }
+            if (years.size > MainViewModel.MAX_SHOW_YEARS) {
+                Spacer(modifier = Modifier.weight(1f))
+                Button(
+                    onClick = {
+                        showYearPopup = true
+                    }) {
+                    Text(
+                        "...",
+                    )
+                    PopupBox(
+                        showPopup = showYearPopup,
+                        onClickOutside = { showYearPopup = false },
+                        content = {
+                            Spacer(modifier = Modifier.height(5.dp))
+                            for (year in years) {
+                                val yearButtonColors = ButtonColors(
+                                    yearColors[year.toInt() % yearColors.size] /*uttonDefaults.buttonColors().containerColor*/,
+                                    MaterialTheme.colorScheme.onBackground,
+                                    ButtonDefaults.buttonColors().disabledContainerColor,
+                                    ButtonDefaults.buttonColors().disabledContentColor
+                                )
+                                val inShowYEars = showYearsCopy.contains(year)
+                                Row(
+                                    modifier = Modifier.padding(
+                                        start = 15.dp,
+                                        end = 15.dp,
+                                        top = 5.dp,
+                                        bottom = 5.dp
+                                    )
+                                ) {
+                                    Button(
+                                        shape = if (inShowYEars) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+                                        colors = if (inShowYEars) yearButtonColors else ButtonDefaults.filledTonalButtonColors(),
+                                        elevation = if (inShowYEars) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+                                        onClick = {
+                                            if (showYearsCopy.contains(year)) {
+                                                showYearsCopy.remove(year)
+                                            } else {
+                                                if (showYearsCopy.size < MainViewModel.MAX_SHOW_YEARS) {
+                                                    showYearsCopy.add(year)
+                                                    showYearsCopy.sort()
+                                                }
+                                            }
+                                            viewModel.setShowYears(showYearsCopy)
+                                        }) {
+                                        Text(
+                                            year,
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(15.dp))
+                            Button(onClick = {
+                                showYearPopup = false
+                            }) {
+                                Text(text = "Close")
+                            }
+                            Spacer(modifier = Modifier.height(5.dp))
+                        })
 
+                }
+            }
         }
+
         if (showYears.isNotEmpty()) {
             ConsumptionYearsScreen(
                 viewModel,
@@ -799,6 +926,7 @@ fun ConsumptionScreen(
                 selector,
                 consumptions,
                 chartStyle,
+                years,
                 showYears
             )
         }
@@ -812,18 +940,16 @@ fun ConsumptionYearsScreen(
     selector: ConsumptionSelector,
     consumptions: List<ConsumptionEntity>,
     chartStyle: ChartStyle,
+    years: List<String>,
     showYears: List<String>,
     modifier: Modifier = Modifier
 ) {
-
-//    println("ConsumptionYearsScreen")
-
     if (consumptions.isNotEmpty()) {
         if (chartStyle == ChartStyle.Horizontal) {
-            HorizontalChart(viewModel, selector, consumptions, showYears)
+            HorizontalChart(viewModel, selector, consumptions, years, showYears)
         }
         if (chartStyle == ChartStyle.Vertical) {
-            VerticalChart(viewModel, selector, consumptions, showYears)
+            VerticalChart(viewModel, selector, consumptions, years, showYears)
         }
     }
 }

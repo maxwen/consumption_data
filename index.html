@@ -1,0 +1,827 @@
+<!doctype html>
+<html>
+  <head>
+    <title>ARGE specification for EED consumption data exchange.</title>
+    <style type="text/css">
+      body {
+	font-family: Trebuchet MS, sans-serif;
+	font-size: 15px;
+	color: #444;
+	margin-right: 24px;
+}
+
+h1	{
+	font-size: 25px;
+}
+h2	{
+	font-size: 20px;
+}
+h3	{
+	font-size: 16px;
+	font-weight: bold;
+}
+hr	{
+	height: 1px;
+	border: 0;
+	color: #ddd;
+	background-color: #ddd;
+}
+
+.app-desc {
+  clear: both;
+  margin-left: 20px;
+}
+.param-name {
+  width: 100%;
+}
+.license-info {
+  margin-left: 20px;
+}
+
+.license-url {
+  margin-left: 20px;
+}
+
+.model {
+  margin: 0 0 0px 20px;
+}
+
+.method {
+  margin-left: 20px;
+}
+
+.method-notes	{
+	margin: 10px 0 20px 0;
+	font-size: 90%;
+	color: #555;
+}
+
+pre {
+  padding: 10px;
+  margin-bottom: 2px;
+}
+
+.http-method {
+ text-transform: uppercase;
+}
+
+pre.get {
+  background-color: #0f6ab4;
+}
+
+pre.post {
+  background-color: #10a54a;
+}
+
+pre.put {
+  background-color: #c5862b;
+}
+
+pre.delete {
+  background-color: #a41e22;
+}
+
+.huge	{
+	color: #fff;
+}
+
+pre.example {
+  background-color: #f3f3f3;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+code {
+  white-space: pre;
+}
+
+.nickname {
+  font-weight: bold;
+}
+
+.method-path {
+  font-size: 1.5em;
+  background-color: #0f6ab4;
+}
+
+.up {
+  float:right;
+}
+
+.parameter {
+  width: 500px;
+}
+
+.param {
+  width: 500px;
+  padding: 10px 0 0 20px;
+  font-weight: bold;
+}
+
+.param-desc {
+  width: 700px;
+  padding: 0 0 0 20px;
+  color: #777;
+}
+
+.param-type {
+  font-style: italic;
+}
+
+.param-enum-header {
+width: 700px;
+padding: 0 0 0 60px;
+color: #777;
+font-weight: bold;
+}
+
+.param-enum {
+width: 700px;
+padding: 0 0 0 80px;
+color: #777;
+font-style: italic;
+}
+
+.field-label {
+  padding: 0;
+  margin: 0;
+  clear: both;
+}
+
+.field-items	{
+	padding: 0 0 15px 0;
+	margin-bottom: 15px;
+}
+
+.return-type {
+  clear: both;
+  padding-bottom: 10px;
+}
+
+.param-header {
+  font-weight: bold;
+}
+
+.method-tags {
+  text-align: right;
+}
+
+.method-tag {
+  background: none repeat scroll 0% 0% #24A600;
+  border-radius: 3px;
+  padding: 2px 10px;
+  margin: 2px;
+  color: #FFF;
+  display: inline-block;
+  text-decoration: none;
+}
+
+    </style>
+  </head>
+  <body>
+  <h1>ARGE specification for EED consumption data exchange.</h1>
+    <div class="app-desc"><h1>English</h1>
+<h2>General Information</h2>
+<p>As part of the EU Energy Efficiency Directive (EED), the ARGE HeiWaKo (www.arge-heiwako.de) publishes a web service
+with which monthly consumption data for residential units can be retrieved at billing unit level from a
+measuring service company (MSC).</p>
+<p>This service is intended to enable the housing industry to provide users/residents with consumption information
+during the year in their own IT systems as part of the EED.</p>
+<p>The service can be implemented by any interested party in its software.</p>
+<p>The server side is covered by the MSC.</p>
+<p>The service was developed according to the criteria of security and minimum implementation costs.</p>
+<h2>Change Log</h2>
+<p>Version 1.2.1:</p>
+<ul>
+<li>Count of available billing units with data services information</li>
+</ul>
+<p>Version 1.2:</p>
+<ul>
+<li>Added information for consumption data services per billing unit</li>
+<li>remarklist on residentialunit</li>
+</ul>
+<p>Version 1.1:</p>
+<ul>
+<li>Added benchmark</li>
+<li>Added flag for converted consumptions</li>
+</ul>
+<h2>Data Model</h2>
+<p>This API uses the following roles:</p>
+<ul>
+<li>MSC: The measuring service company providing the consumption data.</li>
+<li>PM: The property management as customer of the MSC respectively the software reading the consumption data.</li>
+</ul>
+<h2>Security</h2>
+<p>The service is protected with basicAuth authentication and data must be transmitted on a secure channel (HTTPS/SSL).</p>
+<h1>Deutsch</h1>
+<h2>Allgemeine Informationen</h2>
+<p>Im Rahmen der Energieeffizienzrichtlinie der EU (EED) veröffentlicht die die ARGE HeiWaKo (www.arge-heiwako.de) eine
+Schnittstelle, mit der monatliche Verbrauchsdaten auf Nutzeinheitenebene vom Messdienstleistern
+(measuring service company, MSC) abgerufen werden können.</p>
+<p>Diese Schnittstelle soll es der Wohnungswirtschaft ermöglichen, Nutzern/Bewohnern eine unterjährige Verbrauchsinformation
+im Rahmen der EED in eigenen IT-Systemen bereitzustellen.</p>
+<p>Die Serverseite wird von den Messdienstleistern bereitgestellt.</p>
+<p>Der Service wurde nach den Kriterien Sicherheit und minimalem Implementierungsaufwand entwickelt.</p>
+<h2>Änderungen</h2>
+<p>Version 1.2.1:</p>
+<ul>
+<li>Anzahl der verfügbaren Abrechnungseinheiten mit Information zur Service-Aktivierung</li>
+</ul>
+<p>Version 1.2:</p>
+<ul>
+<li>Information zu Service-Aktivierung Verbrauchsdaten für Abrechnungseinheiten hinzugefügt</li>
+<li>Liste von Bemerkungen auf Nutzeinheits-Ebene</li>
+</ul>
+<p>Version 1.1:</p>
+<ul>
+<li>Benchmark hinzugefügt</li>
+<li>Kennzeichen für umgerechnete Verbräuche hinzugefügt (converted)</li>
+</ul>
+<h2>Datenmodell</h2>
+<p>Diese API verwendet die folgenden Rollen:</p>
+<ul>
+<li>MSC: Der Messdienstleister, der die Verbrauchsdaten zur Verfügung stellt.</li>
+<li>PM: Die Hausverwaltung als Kunde des MSC bzw. die Software, die die Verbrauchsdaten ausliest.</li>
+</ul>
+<h2>Sicherheit</h2>
+<p>Die Schnittstelle ist mit basicAuth-Verfahren gesichert.
+Die Datenübertragung muss über einen sicheren Kanal erfolgen (HTTPS/SSL).</p>
+<h1>History</h1>
+<ul>
+<li>2022-01-28: Added comment regarding interpretation of the <code>unitofmeasure</code> when <code>converted</code> flag is set.</li>
+<li>2022-06-09: Added service configuration request</li>
+</ul>
+</div>
+    <div class="app-desc">More information: <a href="https://openapi-generator.tech">https://openapi-generator.tech</a></div>
+    <div class="app-desc">Contact Info: <a href="team@openapitools.org">team@openapitools.org</a></div>
+    <div class="app-desc">Version: 1.2.1</div>
+    <div class="app-desc">BasePath:</div>
+    <div class="license-info">All rights reserved</div>
+    <div class="license-url">http://apache.org/licenses/LICENSE-2.0.html</div>
+  <h2>Access</h2>
+    <ol>
+      <li>HTTP Basic Authentication</li>
+    </ol>
+
+  <h2><a name="__Methods">Methods</a></h2>
+  [ Jump to <a href="#__Models">Models</a> ]
+
+  <h3>Table of Contents </h3>
+  <div class="method-summary"></div>
+  <h4><a href="#EedConsumption">EedConsumption</a></h4>
+  <ul>
+  <li><a href="#countBillingunits"><code><span class="http-method">get</span> /eedbillingunits/count</code></a></li>
+  <li><a href="#getBillingunits"><code><span class="http-method">get</span> /eedbillingunits</code></a></li>
+  <li><a href="#getConsumptionData"><code><span class="http-method">get</span> /billingunits/{billingunit}/consumptions/periods/{period}</code></a></li>
+  <li><a href="#getConsumptionSummary"><code><span class="http-method">get</span> /billingunits/{billingunit}/consumptions/periods</code></a></li>
+  </ul>
+
+  <h1><a name="EedConsumption">EedConsumption</a></h1>
+  <div class="method"><a name="countBillingunits"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /eedbillingunits/count</code></pre></div>
+    <div class="method-summary">Get the number of available billing units (<span class="nickname">countBillingunits</span>)</div>
+    <div class="method-notes">Get the number of billing units, independent of the EED activation status.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#ServiceConfigurationCount">ServiceConfigurationCount</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "count" : 0
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Number of available billing units
+        <a href="#ServiceConfigurationCount">ServiceConfigurationCount</a>
+    <h4 class="field-label">401</h4>
+    Authorization failure.
+        <a href="#"></a>
+    <h4 class="field-label">403</h4>
+    No permission to the requested data with the given credentials.
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    No billing units configured for the current user.
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Technical error.
+        <a href="#"></a>
+    <h4 class="field-label">501</h4>
+    Operation is not supported by the MSC.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getBillingunits"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /eedbillingunits</code></pre></div>
+    <div class="method-summary">Get overview of billingunits with their consumption data service configuration and status (<span class="nickname">getBillingunits</span>)</div>
+    <div class="method-notes">Returns a list of all billing units of the current user that are configured for data exchange
+and a flag if consumption data services are enabled or comments about availability of the service</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">limit (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; How many result entries to return at one time (max 100) default: 20 format: int32</div><div class="param">offset (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; How many result entries should be skipped for pagination default: 0 format: int32</div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#ServiceConfiguration">ServiceConfiguration</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "billingunits" : [ {
+    "reference" : {
+      "pmnumber" : "A/BC/123456789",
+      "mscnumber" : "123456789"
+    },
+    "lastperiod" : "2021-06",
+    "consumptiondata" : true,
+    "servicestart" : "2021-06",
+    "lastperiodupdate" : "2000-01-23T04:56:07.000+00:00",
+    "remarkcodes" : [ "NO_RADIO_EQUIPMENT", "NO_RADIO_EQUIPMENT" ]
+  }, {
+    "reference" : {
+      "pmnumber" : "A/BC/123456789",
+      "mscnumber" : "123456789"
+    },
+    "lastperiod" : "2021-06",
+    "consumptiondata" : true,
+    "servicestart" : "2021-06",
+    "lastperiodupdate" : "2000-01-23T04:56:07.000+00:00",
+    "remarkcodes" : [ "NO_RADIO_EQUIPMENT", "NO_RADIO_EQUIPMENT" ]
+  } ]
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    List of billing units with consumption data enablement flag.
+        <a href="#ServiceConfiguration">ServiceConfiguration</a>
+    <h4 class="field-label">401</h4>
+    Authorization failure.
+        <a href="#"></a>
+    <h4 class="field-label">403</h4>
+    No permission to the requested data with the given credentials.
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    No billing units configured for the current user.
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Technical error.
+        <a href="#"></a>
+    <h4 class="field-label">501</h4>
+    Operation is not supported by the MSC.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getConsumptionData"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /billingunits/{billingunit}/consumptions/periods/{period}</code></pre></div>
+    <div class="method-summary">Get consumption data for a billing unit and specific consumption period. (<span class="nickname">getConsumptionData</span>)</div>
+    <div class="method-notes"></div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">billingunit (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier of the billing unit defined by the measuring service company to request data for. default: null </div><div class="param">period (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Identifier of a requested consumption period. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#ConsumptionData">ConsumptionData</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "billingunit" : {
+    "reference" : {
+      "pmnumber" : "A/BC/123456789",
+      "mscnumber" : "123456789"
+    },
+    "period" : "2021-06",
+    "residentialunits" : [ {
+      "reference" : {
+        "pmnumber" : "XY-12345-00-R1",
+        "mscnumber" : "0010"
+      },
+      "consumptions" : [ {
+        "amount" : 99.03,
+        "converted" : false,
+        "service" : null,
+        "estimated" : true,
+        "remarkcodes" : [ "PARTLY_ESTIMATED", "PARTLY_ESTIMATED" ],
+        "unitofmeasure" : "KWH",
+        "errors" : false
+      }, {
+        "amount" : 99.03,
+        "converted" : false,
+        "service" : null,
+        "estimated" : true,
+        "remarkcodes" : [ "PARTLY_ESTIMATED", "PARTLY_ESTIMATED" ],
+        "unitofmeasure" : "KWH",
+        "errors" : false
+      } ],
+      "benchmarks" : [ {
+        "amount" : 80.0,
+        "service" : null,
+        "unitofmeasure" : "KWH"
+      }, {
+        "amount" : 80.0,
+        "service" : null,
+        "unitofmeasure" : "KWH"
+      } ]
+    }, {
+      "reference" : {
+        "pmnumber" : "XY-12345-00-R1",
+        "mscnumber" : "0010"
+      },
+      "consumptions" : [ {
+        "amount" : 99.03,
+        "converted" : false,
+        "service" : null,
+        "estimated" : true,
+        "remarkcodes" : [ "PARTLY_ESTIMATED", "PARTLY_ESTIMATED" ],
+        "unitofmeasure" : "KWH",
+        "errors" : false
+      }, {
+        "amount" : 99.03,
+        "converted" : false,
+        "service" : null,
+        "estimated" : true,
+        "remarkcodes" : [ "PARTLY_ESTIMATED", "PARTLY_ESTIMATED" ],
+        "unitofmeasure" : "KWH",
+        "errors" : false
+      } ],
+      "benchmarks" : [ {
+        "amount" : 80.0,
+        "service" : null,
+        "unitofmeasure" : "KWH"
+      }, {
+        "amount" : 80.0,
+        "service" : null,
+        "unitofmeasure" : "KWH"
+      } ]
+    } ]
+  }
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    The consumption data overview.
+        <a href="#ConsumptionData">ConsumptionData</a>
+    <h4 class="field-label">401</h4>
+    Authorization failure.
+        <a href="#"></a>
+    <h4 class="field-label">403</h4>
+    No permission to the requested data with the given credentials.
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    No data found for the given billing unit and/or period.
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Technical error.
+        <a href="#"></a>
+    <h4 class="field-label">501</h4>
+    Operation is not supported by the MSC.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getConsumptionSummary"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /billingunits/{billingunit}/consumptions/periods</code></pre></div>
+    <div class="method-summary">Get a summary of available consumption data sets for a billing unit. (<span class="nickname">getConsumptionSummary</span>)</div>
+    <div class="method-notes"><p>This list contains the available consumption data sets for a billing unit.</p>
+<p>The number of available data is subject to contractual agreement between PM and MSC.</p>
+</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">billingunit (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier of the billing unit defined by the measuring service company to request data for. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">year (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Request consumption summaries for this year only. default: null </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#ConsumptionSummary">ConsumptionSummary</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "billingunit" : {
+    "reference" : {
+      "pmnumber" : "A/BC/123456789",
+      "mscnumber" : "123456789"
+    },
+    "periods" : [ {
+      "period" : "2021-06",
+      "update" : "2000-01-23T04:56:07.000+00:00"
+    }, {
+      "period" : "2021-06",
+      "update" : "2000-01-23T04:56:07.000+00:00"
+    } ]
+  }
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    The consumption data overview.
+        <a href="#ConsumptionSummary">ConsumptionSummary</a>
+    <h4 class="field-label">401</h4>
+    Authorization failure.
+        <a href="#"></a>
+    <h4 class="field-label">403</h4>
+    No permission to the requested data with the given credentials.
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    No data found for the given billing unit.
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Technical error.
+        <a href="#"></a>
+    <h4 class="field-label">501</h4>
+    Operation is not supported by the MSC.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+
+  <h2><a name="__Models">Models</a></h2>
+  [ Jump to <a href="#__Methods">Methods</a> ]
+
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#Benchmark"><code>Benchmark</code> - </a></li>
+    <li><a href="#BillingUnitReference"><code>BillingUnitReference</code> - </a></li>
+    <li><a href="#Consumption"><code>Consumption</code> - </a></li>
+    <li><a href="#ConsumptionData"><code>ConsumptionData</code> - </a></li>
+    <li><a href="#ConsumptionDataBillingUnit"><code>ConsumptionDataBillingUnit</code> - </a></li>
+    <li><a href="#ConsumptionDataResidentialUnit"><code>ConsumptionDataResidentialUnit</code> - </a></li>
+    <li><a href="#ConsumptionSummary"><code>ConsumptionSummary</code> - </a></li>
+    <li><a href="#ConsumptionSummaryBillingUnit"><code>ConsumptionSummaryBillingUnit</code> - </a></li>
+    <li><a href="#ConsumptionSummaryPeriod"><code>ConsumptionSummaryPeriod</code> - </a></li>
+    <li><a href="#RemarkCodeListBillingUnitEntry"><code>RemarkCodeListBillingUnitEntry</code> - </a></li>
+    <li><a href="#RemarkCodeListResidentialUnitEntry"><code>RemarkCodeListResidentialUnitEntry</code> - </a></li>
+    <li><a href="#ResidentialUnitReference"><code>ResidentialUnitReference</code> - </a></li>
+    <li><a href="#Service"><code>Service</code> - </a></li>
+    <li><a href="#ServiceConfiguration"><code>ServiceConfiguration</code> - </a></li>
+    <li><a href="#ServiceConfigurationBillingUnit"><code>ServiceConfigurationBillingUnit</code> - </a></li>
+    <li><a href="#ServiceConfigurationCount"><code>ServiceConfigurationCount</code> - </a></li>
+    <li><a href="#UnitOfMeasure"><code>UnitOfMeasure</code> - </a></li>
+  </ol>
+
+  <div class="model">
+    <h3><a name="Benchmark"><code>Benchmark</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Benchmark as required by the German HeizkostenV legislation for a specific service, period and billing unit.</div>
+    <div class="field-items">
+      <div class="param">service </div><div class="param-desc"><span class="param-type"><a href="#Service">Service</a></span>  </div>
+<div class="param">unitofmeasure </div><div class="param-desc"><span class="param-type"><a href="#UnitOfMeasure">UnitOfMeasure</a></span>  </div>
+<div class="param">amount </div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span> The benchmark amount. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="BillingUnitReference"><code>BillingUnitReference</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">mscnumber </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier of a billing unit defined by the MSC. </div>
+<div class="param">pmnumber (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier of a billing unit defined by the propertymanagement. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Consumption"><code>Consumption</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Consumption for a specific service, period and billing unit.</div>
+    <div class="field-items">
+      <div class="param">service </div><div class="param-desc"><span class="param-type"><a href="#Service">Service</a></span>  </div>
+<div class="param">unitofmeasure </div><div class="param-desc"><span class="param-type"><a href="#UnitOfMeasure">UnitOfMeasure</a></span>  </div>
+<div class="param">amount (optional)</div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span> The actual consumption amount in case no errors are present, related to <code>unitofmeasure</code>. </div>
+<div class="param">converted </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> <p>True if the amount is converted from another unit of measure.</p>
+<p>If set to <code>true</code>, the <code>unitofmeasure</code> contains <code>KWH</code>.
+These KWH must be differentiated from measured KWH and their interpretation might be different.</p>
+<p>This applies e.g. when consumption measured in <code>HCU</code> is converted to <code>KWH</code>
+as required by the German HeizkostenV regulations.</p>
+ </div>
+<div class="param">estimated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> True if this is an estimated consumption. </div>
+<div class="param">errors </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> True if errors occurred and no consumption can be presented. </div>
+<div class="param">remarkcodes (optional)</div><div class="param-desc"><span class="param-type"><a href="#RemarkCodeListResidentialUnitEntry">array[RemarkCodeListResidentialUnitEntry]</a></span> statuslist on residential unit base </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ConsumptionData"><code>ConsumptionData</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Consumption data for a billing unit and specific period.</div>
+    <div class="field-items">
+      <div class="param">billingunit </div><div class="param-desc"><span class="param-type"><a href="#ConsumptionDataBillingUnit">ConsumptionDataBillingUnit</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ConsumptionDataBillingUnit"><code>ConsumptionDataBillingUnit</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Consumption data for a billing unit and specific period.</div>
+    <div class="field-items">
+      <div class="param">reference </div><div class="param-desc"><span class="param-type"><a href="#BillingUnitReference">BillingUnitReference</a></span>  </div>
+<div class="param">period </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Identifier of a consumption period with year and month. </div>
+<div class="param">residentialunits </div><div class="param-desc"><span class="param-type"><a href="#ConsumptionDataResidentialUnit">array[ConsumptionDataResidentialUnit]</a></span> List of consumption data on residential unit level. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ConsumptionDataResidentialUnit"><code>ConsumptionDataResidentialUnit</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Consumption data for a residential unit and specific period.</div>
+    <div class="field-items">
+      <div class="param">reference </div><div class="param-desc"><span class="param-type"><a href="#ResidentialUnitReference">ResidentialUnitReference</a></span>  </div>
+<div class="param">consumptions </div><div class="param-desc"><span class="param-type"><a href="#Consumption">array[Consumption]</a></span> Consumption values for different services and measurement units. </div>
+<div class="param">benchmarks (optional)</div><div class="param-desc"><span class="param-type"><a href="#Benchmark">array[Benchmark]</a></span> Benchmarks for different services. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ConsumptionSummary"><code>ConsumptionSummary</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Summary of available consumption data.</div>
+    <div class="field-items">
+      <div class="param">billingunit </div><div class="param-desc"><span class="param-type"><a href="#ConsumptionSummaryBillingUnit">ConsumptionSummaryBillingUnit</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ConsumptionSummaryBillingUnit"><code>ConsumptionSummaryBillingUnit</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Summary of available consumption data for a billing unit.</div>
+    <div class="field-items">
+      <div class="param">reference </div><div class="param-desc"><span class="param-type"><a href="#BillingUnitReference">BillingUnitReference</a></span>  </div>
+<div class="param">periods </div><div class="param-desc"><span class="param-type"><a href="#ConsumptionSummaryPeriod">array[ConsumptionSummaryPeriod]</a></span> Overview of available consumption periods and their last update. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ConsumptionSummaryPeriod"><code>ConsumptionSummaryPeriod</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Describes available data for a consumption period.</div>
+    <div class="field-items">
+      <div class="param">period </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Identifier of a consumption period with year and month. </div>
+<div class="param">update </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> The timestamp of the last data update for this period. format: date-time</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="RemarkCodeListBillingUnitEntry"><code>RemarkCodeListBillingUnitEntry</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'><p>Status of a billing unit:</p>
+<ul>
+<li><code>NO_CONTRACT</code>: no valid contract for consumptions for this billing unit</li>
+<li><code>NO_RADIO_EQUIPMENT</code>: Billing unit is not equipped with radio equipment</li>
+<li><code>ERROR</code>: further unspecified errors</li>
+</ul>
+</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="RemarkCodeListResidentialUnitEntry"><code>RemarkCodeListResidentialUnitEntry</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'><p>Status of a residential unit:</p>
+<ul>
+<li><code>PARTLY_ESTIMATED</code>: consumption is partly based on estimated values</li>
+<li><code>INCOMPLETE</code>: consumption cannot be calculated because of incomplete reading values - e.g. first month after installation of meters</li>
+<li><code>NO_RADIO_EQUIPMENT</code>: Residential unit is not equipped with radio equipment or radio is not enabled</li>
+<li><code>IMPLAUSIBLE_VALUES</code>: the values are obviously implausible to calculate consumption values</li>
+<li><code>CALC_NOT_POSSIBLE</code>: further reasons that calculation is not possible</li>
+<li><code>ERROR</code>: further unspecified errors</li>
+</ul>
+</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ResidentialUnitReference"><code>ResidentialUnitReference</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">mscnumber </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier of a residential unit defined by the MSC given as additional information. </div>
+<div class="param">pmnumber (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier of a residential unit defined by the PM given as additional information. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Service"><code>Service</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'><p>The service a consumption value is related to:</p>
+<ul>
+<li><code>HEATING</code></li>
+<li><code>HOT_WATER</code></li>
+<li><code>COOLING</code></li>
+<li><code>COLD_WATER</code></li>
+</ul>
+</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ServiceConfiguration"><code>ServiceConfiguration</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Overview of service configurations for billing units.</div>
+    <div class="field-items">
+      <div class="param">billingunits </div><div class="param-desc"><span class="param-type"><a href="#ServiceConfigurationBillingUnit">array[ServiceConfigurationBillingUnit]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ServiceConfigurationBillingUnit"><code>ServiceConfigurationBillingUnit</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Service configuration for a billing unit.</div>
+    <div class="field-items">
+      <div class="param">reference </div><div class="param-desc"><span class="param-type"><a href="#BillingUnitReference">BillingUnitReference</a></span>  </div>
+<div class="param">consumptiondata </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> True if consumption data services are enabled for this billing unit. </div>
+<div class="param">lastperiod (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Identifier of a consumption period with year and month. </div>
+<div class="param">lastperiodupdate (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> The timestamp of the last data update for the last period. format: date-time</div>
+<div class="param">servicestart (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Identifier of a consumption period with year and month. </div>
+<div class="param">remarkcodes (optional)</div><div class="param-desc"><span class="param-type"><a href="#RemarkCodeListBillingUnitEntry">array[RemarkCodeListBillingUnitEntry]</a></span> statuslist on billing unit base </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ServiceConfigurationCount"><code>ServiceConfigurationCount</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">count </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The number of available billing units </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="UnitOfMeasure"><code>UnitOfMeasure</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'><p>The measured unit:</p>
+<ul>
+<li><code>KWH</code></li>
+<li><code>HCU</code>: Units of heat cost allocators.</li>
+<li><code>M3</code></li>
+</ul>
+</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  </body>
+</html>

@@ -27,6 +27,9 @@ import org.openapitools.client.models.ServiceConfigurationBillingUnit
 import org.openapitools.client.models.UnitOfMeasure
 
 class MainViewModel : ViewModel() {
+    companion object {
+        const val MAX_SHOW_YEARS = 4
+    }
     private val _loaded = MutableStateFlow(false)
     val loaded: StateFlow<Boolean> = _loaded.asStateFlow()
     private val _loadError = MutableStateFlow(false)
@@ -35,7 +38,6 @@ class MainViewModel : ViewModel() {
     val progress: StateFlow<Boolean> = _progress.asStateFlow()
 
     private val _selector = MutableStateFlow(ConsumptionSelector())
-    val selector: StateFlow<ConsumptionSelector> = _selector.asStateFlow()
     private val data = ConsumptionHub()
     private val _squashResidentialUnits = MutableStateFlow(false)
     val squashResidentialUnits: StateFlow<Boolean> = _squashResidentialUnits.asStateFlow()
