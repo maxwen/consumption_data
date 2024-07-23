@@ -20,6 +20,8 @@ class ConsumptionHub {
         ServerException::class
     )
     suspend fun load(baseUrl: String, username: String, password: String) {
+        billingunits.clear()
+        unitData.clear()
         val client = EedConsumptionApi(baseUrl, username, password)
         var offset = 0
         val limit = 20
@@ -84,6 +86,18 @@ class ConsumptionHub {
         return set
     }
 
+    fun getBillingUnitServicesUnitOfMeasure(mscnumber: String, service: Service): Set<UnitOfMeasure> {
+        val set = mutableSetOf<UnitOfMeasure>()
+        unitData[mscnumber]?.forEach { billingUnitData ->
+            billingUnitData.value.residentialunits.forEach {
+                it.consumptions.forEach { consumption ->
+                    set.add(consumption.unitofmeasure)
+                }
+            }
+        }
+        return set
+    }
+
     fun getBillingUnitResidentialUnits(mscnumber: String): Set<ResidentialUnitReference> {
         val set = mutableSetOf<ResidentialUnitReference>()
         unitData[mscnumber]?.forEach { billingUnitData ->
@@ -99,6 +113,7 @@ class ConsumptionHub {
     ): List<ConsumptionEntity>? {
         val mscnumber = selector.billingUnit.mscnumber
         val service = selector.service
+        val unitOfMeasure = selector.unitOfMeasure
         val residentialUnit = selector.residentialUnit
         if (unitData.containsKey(mscnumber)) {
             val billingUnit = selector.billingUnit
@@ -106,10 +121,13 @@ class ConsumptionHub {
             unitData[mscnumber]?.keys?.forEach { period ->
                 var outOfPeriod = false
                 if (selector.periodStart != null) {
-                    outOfPeriod = period < selector.periodStart!!
+                    outOfPeriod = period < selector.periodStart
                 }
                 if (selector.periodEnd != null && !outOfPeriod) {
-                    outOfPeriod = period > selector.periodEnd!!
+                    outOfPeriod = period > selector.periodEnd
+                }
+                if (selector.years != null && !outOfPeriod) {
+                    outOfPeriod = !selector.years.contains(Period(period).year())
                 }
                 if (!outOfPeriod) {
                     val billingUnitData = unitData[mscnumber]?.get(period)
@@ -119,7 +137,7 @@ class ConsumptionHub {
                             ignoreResidential = true
                         }
                         if (ignoreResidential || unit.reference == residentialUnit) {
-                            unit.consumptions.filter { c -> c.service == service && c.amount != null && !c.errors }
+                            unit.consumptions.filter { c -> c.service == service && c.unitofmeasure == unitOfMeasure && c.amount != null && !c.errors }
                                 .forEach { c ->
                                     val e = ConsumptionEntity(
                                         period,

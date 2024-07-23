@@ -4,6 +4,11 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import kotlinx.coroutines.flow.first
 
+enum class ChartStyle {
+    Horizontal,
+    Vertical
+}
+
 object Settings {
     private val TAG = "Settings"
 
@@ -11,7 +16,8 @@ object Settings {
     private val BASEURL = stringPreferencesKey("baseurl")
     private val USERNAME = stringPreferencesKey("username")
     private val PASSWORD = stringPreferencesKey("password")
-    private val SETUP  = intPreferencesKey("setup")
+    private val SETUP = intPreferencesKey("setup")
+    private val CHARTSTYLE = intPreferencesKey("chartstyle")
 
     suspend fun setSetupDone() {
         Result.runCatching {
@@ -67,6 +73,29 @@ object Settings {
     suspend fun getPasword(): String {
         val settings = myDataStore.data.first().toPreferences()
         val value = settings[PASSWORD] ?: ""
+        return value
+    }
+
+    suspend fun setChartStyle(chartStyle: ChartStyle) {
+        Result.runCatching {
+            myDataStore.edit { settings ->
+                settings[CHARTSTYLE] = when (chartStyle) {
+                    ChartStyle.Vertical -> 0
+                    ChartStyle.Horizontal -> 1
+                }
+            }
+        }
+    }
+
+    suspend fun getCharStyle(): ChartStyle {
+        val settings = myDataStore.data.first().toPreferences()
+        val value = when (settings[CHARTSTYLE]) {
+            0 -> ChartStyle.Vertical
+            1 -> ChartStyle.Horizontal
+            else -> {
+                ChartStyle.Vertical
+            }
+        }
         return value
     }
 }

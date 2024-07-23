@@ -5,11 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -20,12 +22,17 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,6 +46,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.motionEventSpy
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -52,6 +61,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.maxwen.consumption.models.ChartStyle
 import com.maxwen.consumption.models.ConsumptionEntity
 import com.maxwen.consumption.models.ConsumptionSelector
 import com.maxwen.consumption.models.Period
@@ -65,13 +75,14 @@ import com.maxwen.consumption_data.charts.VerticalYearChart
 import com.maxwen.consumption_data.charts.YearChartData
 import org.openapitools.client.models.ServiceConfigurationBillingUnit
 import createDataStore
-import kotlinproject.composeapp.generated.resources.Res
-import kotlinproject.composeapp.generated.resources.eye_off_outline
-import kotlinproject.composeapp.generated.resources.eye_outline
-import kotlinproject.composeapp.generated.resources.heat_device
-import kotlinproject.composeapp.generated.resources.water_device
+import consumption_data.composeapp.generated.resources.Res
+import consumption_data.composeapp.generated.resources.eye_off_outline
+import consumption_data.composeapp.generated.resources.eye_outline
+import consumption_data.composeapp.generated.resources.heat_device
+import consumption_data.composeapp.generated.resources.water_device
 import org.jetbrains.compose.resources.vectorResource
 import org.openapitools.client.models.Service
+import org.openapitools.client.models.UnitOfMeasure
 import ui.theme.AppTheme
 
 enum class Screens() {
@@ -133,16 +144,23 @@ class MainActivity() : ComponentActivity() {
                         navController,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(10.dp)
+                            .padding(start = 10.dp, end = 10.dp)
                     )
                 }
                 composable(route = Screens.ConsumptionScreen.name) {
+                    val consumptions = viewModel.getConsumptionOfUnit(viewModel.getSelector())
+                    val years = viewModel.yearListOfConsumptionData(viewModel.getSelector())
+                    // TODO we can really only show 4 years on a phoen in portrait
+                    viewModel.setShowYears(years)
                     ConsumptionScreen(
                         viewModel,
                         navController,
+                        viewModel.getSelector(),
+                        consumptions,
+                        years,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(10.dp)
+                            .padding(start = 10.dp, end = 10.dp)
                     )
                 }
                 composable(route = Screens.SettingsScreen.name) {
@@ -296,6 +314,7 @@ fun BillingUnitsScreen(
     val loaded by viewModel.loaded.collectAsState()
     val loadError by viewModel.loadError.collectAsState()
     val isSetupDone by viewModel.isSetupDone.collectAsState()
+    val progress by viewModel.progress.collectAsState()
 
     val squashResidentialUnits by viewModel.squashResidentialUnits.collectAsState()
 
@@ -305,6 +324,8 @@ fun BillingUnitsScreen(
     ) {
         if (!isSetupDone) {
             SetupScreen(viewModel, navHostController, modifier)
+        } else if (progress) {
+            Progress()
         } else if (loaded) {
             Column(
                 Modifier
@@ -323,39 +344,48 @@ fun BillingUnitsScreen(
 
                         viewModel.getBillingUntitServices(billingUnit.reference.mscnumber)
                             .forEach { service ->
-                                if (squashResidentialUnits) {
-                                    val selector =
-                                        ConsumptionSelector(
-                                            billingUnit.reference,
-                                            service,
-                                            null,
-                                            periodStart = serviceStart
-                                        )
-
-                                    BillingUnitCard(
-                                        viewModel,
-                                        navHostController,
-                                        billingUnit,
-                                        selector
+                                val unitOfMeasureSet =
+                                    viewModel.getBillingUnitServicesUnitOfMeasure(
+                                        billingUnit.reference.mscnumber,
+                                        service
                                     )
-                                } else {
-                                    viewModel.getBillingUntitResidentialUnits(billingUnit.reference.mscnumber)
-                                        .forEach { residentialUnit ->
-                                            val selector =
-                                                ConsumptionSelector(
-                                                    billingUnit.reference,
-                                                    service,
-                                                    residentialUnit,
-                                                    periodStart = serviceStart
-                                                )
-
-                                            BillingUnitCard(
-                                                viewModel,
-                                                navHostController,
-                                                billingUnit,
-                                                selector
+                                unitOfMeasureSet.forEach { unitOfMeasure ->
+                                    if (squashResidentialUnits) {
+                                        val selector =
+                                            ConsumptionSelector(
+                                                billingUnit.reference,
+                                                service,
+                                                unitOfMeasure,
+                                                null,
+                                                periodStart = serviceStart
                                             )
-                                        }
+
+                                        BillingUnitCard(
+                                            viewModel,
+                                            navHostController,
+                                            billingUnit,
+                                            selector
+                                        )
+                                    } else {
+                                        viewModel.getBillingUntitResidentialUnits(billingUnit.reference.mscnumber)
+                                            .forEach { residentialUnit ->
+                                                val selector =
+                                                    ConsumptionSelector(
+                                                        billingUnit.reference,
+                                                        service,
+                                                        unitOfMeasure,
+                                                        residentialUnit,
+                                                        periodStart = serviceStart
+                                                    )
+
+                                                BillingUnitCard(
+                                                    viewModel,
+                                                    navHostController,
+                                                    billingUnit,
+                                                    selector
+                                                )
+                                            }
+                                    }
                                 }
                             }
                     }
@@ -376,7 +406,7 @@ fun LoadErrorScreen(
     navHostController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(modifier = Modifier.weight(0.5f))
         Text(
             "Load error.. blablabla", fontWeight = FontWeight.Bold, fontSize = 18.sp
@@ -409,7 +439,7 @@ fun SetupScreen(
     navHostController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(modifier = Modifier.weight(0.5f))
         Text(
             "Hello please fill settings .. blablabla",
@@ -422,6 +452,49 @@ fun SetupScreen(
             Text("Settings")
         }
         Spacer(modifier = Modifier.weight(0.5f))
+    }
+}
+
+@Composable
+fun Progress(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(modifier = Modifier.weight(0.5f))
+        CircularProgressIndicator(
+            modifier = Modifier.width(64.dp),
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
+
+        Spacer(modifier = Modifier.weight(0.5f))
+    }
+}
+
+@Composable
+fun BillingUnitCardRow(
+    key: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    value2: String? = null,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
+    ) {
+        if (value2 != null) {
+            Row(modifier = Modifier.weight(0.6f)) {
+                Text(key, style = MaterialTheme.typography.bodyMedium)
+            }
+            Row(modifier = Modifier.weight(0.4f)) {
+                Text(text = value, style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = value2, style = MaterialTheme.typography.bodyMedium)
+            }
+        } else {
+            Text(key, style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.weight(1f))
+            Text(text = value, style = MaterialTheme.typography.bodyMedium)
+        }
     }
 }
 
@@ -442,8 +515,9 @@ fun BillingUnitCard(
         viewModel.avgConsumptionOfUnit(selector);
     val sumConsumption =
         viewModel.sumConsumptionOfUnit(selector);
+    val service = selector.service
 
-    Card(
+    OutlinedCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
         ),
@@ -458,43 +532,64 @@ fun BillingUnitCard(
         Column(
             modifier = Modifier.padding(15.dp)
         ) {
-            Text("Billing unit $mscnumber")
-            Text("Start period " + (billingUnit.servicestart ?: ""))
-            Text("Last period " + (billingUnit.lastperiod ?: ""))
-            val service = selector.service
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                when (service) {
-                    Service.HEATING -> {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.heat_device),
-                            contentDescription = null
-                        )
-                    }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(end = 10.dp)
+            ) {
+                Text(mscnumber, style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.weight(1f))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    when (service) {
+                        Service.HEATING -> {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.heat_device),
+                                contentDescription = null
+                            )
+                        }
 
-                    Service.HOT_WATER -> {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.water_device),
-                            contentDescription = null
-                        )
-                    }
+                        Service.HOT_WATER -> {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.water_device),
+                                contentDescription = null
+                            )
+                        }
 
-                    Service.COOLING -> TODO()
-                    Service.COLD_WATER -> TODO()
+                        Service.COOLING -> TODO()
+                        Service.COLD_WATER -> TODO()
+                    }
+                    Text(
+                        modifier = Modifier.padding(start = 5.dp),
+                        text = selector.service.toString() + " " + selector.unitOfMeasure.toString(),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
-                Text(modifier = Modifier.padding(start = 5.dp), text = selector.service.toString())
-            }
-            if (selector.residentialUnit != null) {
-                Text("Residential unit " + selector.residentialUnit.mscnumber)
+
             }
 
+            BillingUnitCardRow("Start", (billingUnit.servicestart ?: ""))
+            BillingUnitCardRow("Last", (billingUnit.lastperiod ?: ""))
+
+            if (selector.residentialUnit != null) {
+                BillingUnitCardRow("Residential", selector.residentialUnit.mscnumber)
+            }
+
+            Text("Consumption", style = MaterialTheme.typography.titleLarge)
             if (minConsumption != null) {
-                Text("Min " + minConsumption.first + " " + minConsumption.second)
+                BillingUnitCardRow(
+                    "Min",
+                    minConsumption.first,
+                    value2 = minConsumption.second.toString()
+                )
             }
             if (maxConsumption != null) {
-                Text("Max " + maxConsumption.first + " " + maxConsumption.second)
+                BillingUnitCardRow(
+                    "Max",
+                    maxConsumption.first,
+                    value2 = maxConsumption.second.toString()
+                )
             }
-            Text("Avg $avgConsumption")
-            Text("Sum $sumConsumption")
+            BillingUnitCardRow("Average", avgConsumption.toString())
+            BillingUnitCardRow("Total", sumConsumption.toString())
         }
     }
 }
@@ -504,42 +599,53 @@ fun VerticalChart(
     viewModel: MainViewModel,
     selector: ConsumptionSelector,
     consumptions: List<ConsumptionEntity>,
+    showYears: List<String>
 ) {
     val years = viewModel.yearListOfConsumptionData(selector)
-    val yearChart = YearChartData(service = selector.service, unitOfMeassure = consumptions.first().unitofmeasure)
+    val yearChart = YearChartData(
+        service = selector.service,
+        unitOfMeassure = consumptions.first().unitofmeasure
+    )
     years.forEach { year ->
-        val sum = viewModel.yearSumConsumptionOfUnit(selector, year)
-        val chartConsumption = ChartConsumption(
-            sum ?: 0.0,
-            year,
-            year,
-            selector.service,
-            consumptions.first().unitofmeasure,
-            selector.billingUnit,
-            selector.residentialUnit
-        )
+        if (showYears.contains(year)) {
+            val sum = viewModel.yearSumConsumptionOfUnit(selector, year)
+            val chartConsumption = ChartConsumption(
+                sum ?: 0.0,
+                year,
+                year,
+                selector.service,
+                consumptions.first().unitofmeasure,
+                selector.billingUnit,
+                selector.residentialUnit
+            )
 
-        yearChart.addConsumption(
-            year, chartConsumption
-        )
+            yearChart.addConsumption(
+                year, chartConsumption
+            )
+        }
     }
 
     VerticalYearChart(yearChart)
 
-    val monthChart = MonthChartData(service = selector.service, unitOfMeassure = consumptions.first().unitofmeasure)
+    val monthChart = MonthChartData(
+        service = selector.service,
+        unitOfMeassure = consumptions.first().unitofmeasure
+    )
     consumptions.forEach { consumption ->
         val period = Period(consumption.period)
-        monthChart.addConsumption(
-            period.year(), period.month(), ChartConsumption(
-                consumption.amount ?: 0.0,
-                period.month(),
-                consumption.period,
-                selector.service,
-                consumption.unitofmeasure,
-                selector.billingUnit,
-                selector.residentialUnit
+        if (showYears.contains(period.year())) {
+            monthChart.addConsumption(
+                period.year(), period.month(), ChartConsumption(
+                    consumption.amount ?: 0.0,
+                    period.month(),
+                    consumption.period,
+                    selector.service,
+                    consumption.unitofmeasure,
+                    selector.billingUnit,
+                    selector.residentialUnit
+                )
             )
-        )
+        }
     }
     VerticalMonthChart(
         monthChart,
@@ -559,42 +665,53 @@ fun HorizontalChart(
     viewModel: MainViewModel,
     selector: ConsumptionSelector,
     consumptions: List<ConsumptionEntity>,
+    showYears: List<String>
 ) {
     val years = viewModel.yearListOfConsumptionData(selector)
-    val yearChart = YearChartData(service = selector.service, unitOfMeassure = consumptions.first().unitofmeasure)
+    val yearChart = YearChartData(
+        service = selector.service,
+        unitOfMeassure = consumptions.first().unitofmeasure
+    )
     years.forEach { year ->
-        val sum = viewModel.yearSumConsumptionOfUnit(selector, year)
-        val chartConsumption = ChartConsumption(
-            sum ?: 0.0,
-            year,
-            year,
-            selector.service,
-            consumptions.first().unitofmeasure,
-            selector.billingUnit,
-            selector.residentialUnit
-        )
+        if (showYears.contains(year)) {
+            val sum = viewModel.yearSumConsumptionOfUnit(selector, year)
+            val chartConsumption = ChartConsumption(
+                sum ?: 0.0,
+                year,
+                year,
+                selector.service,
+                consumptions.first().unitofmeasure,
+                selector.billingUnit,
+                selector.residentialUnit
+            )
 
-        yearChart.addConsumption(
-            year, chartConsumption
-        )
+            yearChart.addConsumption(
+                year, chartConsumption
+            )
+        }
     }
 
     HorizontalYearChart(yearChart)
 
-    val monthChart = MonthChartData(service = selector.service, unitOfMeassure = consumptions.first().unitofmeasure)
+    val monthChart = MonthChartData(
+        service = selector.service,
+        unitOfMeassure = consumptions.first().unitofmeasure
+    )
     consumptions.forEach { consumption ->
         val period = Period(consumption.period)
-        monthChart.addConsumption(
-            period.year(), period.month(), ChartConsumption(
-                consumption.amount ?: 0.0,
-                period.month(),
-                consumption.period,
-                selector.service,
-                consumption.unitofmeasure,
-                selector.billingUnit,
-                selector.residentialUnit
+        if (showYears.contains(period.year())) {
+            monthChart.addConsumption(
+                period.year(), period.month(), ChartConsumption(
+                    consumption.amount ?: 0.0,
+                    period.month(),
+                    consumption.period,
+                    selector.service,
+                    consumption.unitofmeasure,
+                    selector.billingUnit,
+                    selector.residentialUnit
+                )
             )
-        )
+        }
     }
 
     HorizontalMonthChart(monthChart, yearChart.sortedYears(), 30.dp)
@@ -612,17 +729,102 @@ fun HorizontalChart(
 fun ConsumptionScreen(
     viewModel: MainViewModel,
     navHostController: NavHostController,
+    selector: ConsumptionSelector,
+    consumptions: List<ConsumptionEntity>,
+    years: List<String>,
     modifier: Modifier = Modifier
 ) {
-    val selector by viewModel.selector.collectAsState()
-    val consumptions = viewModel.getConsumptionOfUnit(selector)
+    val chartStyle by viewModel.chartStle.collectAsState()
+    val showYears by viewModel.showYears.collectAsState()
+    val showYearsCopy = mutableListOf<String>()
+    showYearsCopy.addAll(showYears)
 
+//    println("ConsumptionScreen")
     Column(
         modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
     ) {
-        HorizontalChart(viewModel, selector, consumptions)
-        VerticalChart(viewModel, selector, consumptions)
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(modifier = modifier.fillMaxWidth()) {
+            Button(
+                shape = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+                colors = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+                elevation = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+                onClick = { viewModel.setChartStyle(ChartStyle.Vertical) }) {
+                Text(
+                    "Vertical",
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Button(
+                shape = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+                colors = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+                elevation = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+                onClick = { viewModel.setChartStyle(ChartStyle.Horizontal) }) {
+                Text(
+                    "Horizontal",
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(modifier = modifier.fillMaxWidth()) {
+            for (year in years) {
+                val inShowYEars = showYearsCopy.contains(year)
+                Button(
+                    shape = if (inShowYEars) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+                    colors = if (inShowYEars) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+                    elevation = if (inShowYEars) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+                    onClick = {
+                        if (showYearsCopy.contains(year)) {
+                            showYearsCopy.remove(year)
+                        } else {
+                            showYearsCopy.add(year)
+                            showYearsCopy.sort()
+                        }
+                        viewModel.setShowYears(showYearsCopy)
+                    }) {
+                    Text(
+                        year,
+                    )
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+            }
+
+        }
+        if (showYears.isNotEmpty()) {
+            ConsumptionYearsScreen(
+                viewModel,
+                navHostController,
+                selector,
+                consumptions,
+                chartStyle,
+                showYears
+            )
+        }
     }
 }
+
+@Composable
+fun ConsumptionYearsScreen(
+    viewModel: MainViewModel,
+    navHostController: NavHostController,
+    selector: ConsumptionSelector,
+    consumptions: List<ConsumptionEntity>,
+    chartStyle: ChartStyle,
+    showYears: List<String>,
+    modifier: Modifier = Modifier
+) {
+
+//    println("ConsumptionYearsScreen")
+
+    if (consumptions.isNotEmpty()) {
+        if (chartStyle == ChartStyle.Horizontal) {
+            HorizontalChart(viewModel, selector, consumptions, showYears)
+        }
+        if (chartStyle == ChartStyle.Vertical) {
+            VerticalChart(viewModel, selector, consumptions, showYears)
+        }
+    }
+}
+

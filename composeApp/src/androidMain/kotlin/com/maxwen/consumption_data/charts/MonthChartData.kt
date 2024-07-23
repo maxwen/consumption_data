@@ -15,6 +15,9 @@ class MonthChartData(private val monthData: MutableMap<String, MutableMap<String
             yearData = mutableMapOf<String, ChartConsumption>()
             monthData[year] = yearData
         }
+        if (yearData.containsKey(month)) {
+            println("" + consumption.unitOfMeasure)
+        }
         yearData[month] = consumption
         if (consumption.amount < minAmount) {
             minAmount = consumption.amount

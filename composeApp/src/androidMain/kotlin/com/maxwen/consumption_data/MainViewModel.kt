@@ -2,6 +2,7 @@ package com.maxwen.consumption_data
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maxwen.consumption.models.ChartStyle
 import com.maxwen.consumption.models.ConsumptionEntity
 import com.maxwen.consumption.models.ConsumptionHub
 import com.maxwen.consumption.models.ConsumptionSelector
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openapitools.client.apis.EedConsumptionApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -22,12 +24,15 @@ import org.openapitools.client.models.BillingUnitReference
 import org.openapitools.client.models.ResidentialUnitReference
 import org.openapitools.client.models.Service
 import org.openapitools.client.models.ServiceConfigurationBillingUnit
+import org.openapitools.client.models.UnitOfMeasure
 
 class MainViewModel : ViewModel() {
     private val _loaded = MutableStateFlow(false)
     val loaded: StateFlow<Boolean> = _loaded.asStateFlow()
     private val _loadError = MutableStateFlow(false)
     val loadError: StateFlow<Boolean> = _loadError.asStateFlow()
+    private val _progress = MutableStateFlow(false)
+    val progress: StateFlow<Boolean> = _progress.asStateFlow()
 
     private val _selector = MutableStateFlow(ConsumptionSelector())
     val selector: StateFlow<ConsumptionSelector> = _selector.asStateFlow()
@@ -42,11 +47,20 @@ class MainViewModel : ViewModel() {
     private val _isConfigComplete = MutableStateFlow(false)
     val isConfigComplete: StateFlow<Boolean> = _isConfigComplete.asStateFlow()
 
+    private val _chartStle = MutableStateFlow(ChartStyle.Vertical)
+    val chartStle: StateFlow<ChartStyle> = _chartStle.asStateFlow()
+
+    private val _showYears = MutableStateFlow(mutableListOf<String>())
+    val showYears: StateFlow<List<String>> = _showYears.asStateFlow()
+
     init {
         viewModelScope.launch {
+            startProgress()
+
             password.update { Settings.getPasword() }
             username.update { Settings.getUsername() }
             baseurl.update { Settings.getBaseUrl() }
+            _chartStle.update { Settings.getCharStyle() }
             _isSetupDone.update { Settings.isSetupDone() }
             _isConfigComplete.update { isConfigComplete() }
 
@@ -57,12 +71,15 @@ class MainViewModel : ViewModel() {
                 if (isConfigComplete.value) {
                     _loadError.update { true }
                 }
+            } finally {
+                stopProgress()
             }
         }
     }
 
     fun reload() {
         viewModelScope.launch {
+            startProgress()
             try {
                 _loadError.update { false }
                 data.load(baseurl.value, username.value, password.value)
@@ -72,8 +89,32 @@ class MainViewModel : ViewModel() {
                     _loadError.update { true }
                 }
                 _loaded.update { false }
+            } finally {
+                stopProgress()
             }
         }
+    }
+
+    fun setShowYears(showYears: List<String>) {
+        this._showYears.update {
+            showYears.toMutableList()
+        }
+    }
+
+
+    fun setChartStyle(style: ChartStyle) {
+        _chartStle.update { style }
+        viewModelScope.launch {
+            Settings.setChartStyle(style)
+        }
+    }
+
+    private fun startProgress() {
+        _progress.update { true }
+    }
+
+    private fun stopProgress() {
+        _progress.update { false }
     }
 
     fun resetLoadError() {
@@ -125,6 +166,10 @@ class MainViewModel : ViewModel() {
         _selector.value = selector
     }
 
+    fun getSelector(): ConsumptionSelector {
+        return _selector.value
+    }
+
     fun getBillingUnits(): List<ServiceConfigurationBillingUnit> {
         return data.getBillingUnits()
     }
@@ -141,6 +186,12 @@ class MainViewModel : ViewModel() {
         return data.getBillingUnitResidentialUnits(mscnumber)
     }
 
+    fun getBillingUnitServicesUnitOfMeasure(
+        mscnumber: String,
+        service: Service
+    ): Set<UnitOfMeasure> {
+        return data.getBillingUnitServicesUnitOfMeasure(mscnumber, service)
+    }
 
     fun getConsumptionOfUnit(
         selector: ConsumptionSelector,
@@ -179,6 +230,7 @@ class MainViewModel : ViewModel() {
         val selectorPeriod = ConsumptionSelector(
             selector.billingUnit,
             selector.service,
+            selector.unitOfMeasure,
             selector.residentialUnit,
             "$year-01",
             "$year-12"

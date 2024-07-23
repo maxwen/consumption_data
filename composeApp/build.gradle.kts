@@ -36,7 +36,6 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.android)
             implementation(libs.androidx.material3.android)
-            implementation ("io.github.ehsannarmani:compose-charts:0.0.13")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
