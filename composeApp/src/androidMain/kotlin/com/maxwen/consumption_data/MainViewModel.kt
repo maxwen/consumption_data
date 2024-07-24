@@ -2,25 +2,18 @@ package com.maxwen.consumption_data
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maxwen.consumption.models.ChartStyle
-import com.maxwen.consumption.models.ConsumptionEntity
-import com.maxwen.consumption.models.ConsumptionHub
-import com.maxwen.consumption.models.ConsumptionSelector
-import com.maxwen.consumption.models.Period
-import com.maxwen.consumption.models.Settings
-import com.maxwen.consumption_data.charts.ChartConsumption
+import com.maxwen.consumption_data.models.ChartDisplay
+import com.maxwen.consumption_data.models.ChartStyle
+import com.maxwen.consumption_data.models.ConsumptionEntity
+import com.maxwen.consumption_data.models.ConsumptionHub
+import com.maxwen.consumption_data.models.ConsumptionSelector
+import com.maxwen.consumption_data.models.Period
+import com.maxwen.consumption_data.models.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.openapitools.client.apis.EedConsumptionApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import org.openapitools.client.models.BillingUnitReference
 import org.openapitools.client.models.ResidentialUnitReference
 import org.openapitools.client.models.Service
 import org.openapitools.client.models.ServiceConfigurationBillingUnit
@@ -54,6 +47,9 @@ class MainViewModel : ViewModel() {
 
     private val _showYears = MutableStateFlow(mutableListOf<String>())
     val showYears: StateFlow<List<String>> = _showYears.asStateFlow()
+
+    private val _chartDisplay = MutableStateFlow(ChartDisplay.Yearly)
+    val chartDisplay: StateFlow<ChartDisplay> = _chartDisplay.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -103,12 +99,15 @@ class MainViewModel : ViewModel() {
         }
     }
 
-
     fun setChartStyle(style: ChartStyle) {
         _chartStle.update { style }
         viewModelScope.launch {
             Settings.setChartStyle(style)
         }
+    }
+
+    fun setChartDisplay(display: ChartDisplay) {
+        _chartDisplay.update { display }
     }
 
     private fun startProgress() {

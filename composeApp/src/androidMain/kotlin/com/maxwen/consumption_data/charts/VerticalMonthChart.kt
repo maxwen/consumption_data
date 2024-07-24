@@ -14,12 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maxwen.consumption.models.Period
+import com.maxwen.consumption_data.models.Period
 
 @Composable
 fun VerticalMonthChart(
@@ -38,11 +37,13 @@ fun VerticalMonthChart(
             .fillMaxWidth()
             .padding(top = 20.dp)
     ) {
-        Text(
-            years.joinToString(separator = ","),
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-        )
+        if (years.size == 1) {
+            Text(
+                years.joinToString(separator = ","),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+            )
+        }
         Text(text = monthChart.unitOfMeassure.toString(), modifier = Modifier.padding(top = 10.dp))
 
         val maxAmount = monthChart.maxAmount()

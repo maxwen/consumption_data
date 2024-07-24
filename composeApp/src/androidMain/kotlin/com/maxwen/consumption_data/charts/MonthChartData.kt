@@ -1,6 +1,6 @@
 package com.maxwen.consumption_data.charts
 
-import com.maxwen.consumption.models.Period
+import com.maxwen.consumption_data.models.Period
 import org.openapitools.client.models.Service
 import org.openapitools.client.models.UnitOfMeasure
 import kotlin.math.pow

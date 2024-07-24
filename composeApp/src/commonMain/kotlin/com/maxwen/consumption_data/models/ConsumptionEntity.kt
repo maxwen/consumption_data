@@ -1,6 +1,5 @@
-package com.maxwen.consumption.models
+package com.maxwen.consumption_data.models
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

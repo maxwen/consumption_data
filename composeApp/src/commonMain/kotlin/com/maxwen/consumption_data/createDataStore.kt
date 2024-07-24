@@ -1,3 +1,5 @@
+package com.maxwen.consumption_data
+
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences

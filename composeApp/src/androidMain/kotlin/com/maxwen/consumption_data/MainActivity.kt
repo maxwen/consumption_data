@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,28 +13,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -51,10 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.motionEventSpy
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -70,11 +63,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.maxwen.consumption.models.ChartStyle
-import com.maxwen.consumption.models.ConsumptionEntity
-import com.maxwen.consumption.models.ConsumptionSelector
-import com.maxwen.consumption.models.Period
-import com.maxwen.consumption.models.Settings
+import com.maxwen.consumption_data.models.ChartDisplay
+import com.maxwen.consumption_data.models.ChartStyle
+import com.maxwen.consumption_data.models.ConsumptionEntity
+import com.maxwen.consumption_data.models.ConsumptionSelector
+import com.maxwen.consumption_data.models.Period
+import com.maxwen.consumption_data.models.Settings
 import com.maxwen.consumption_data.charts.ChartConsumption
 import com.maxwen.consumption_data.charts.ChartProperties
 import com.maxwen.consumption_data.charts.HorizontalMonthChart
@@ -84,7 +78,6 @@ import com.maxwen.consumption_data.charts.VerticalMonthChart
 import com.maxwen.consumption_data.charts.VerticalYearChart
 import com.maxwen.consumption_data.charts.YearChartData
 import org.openapitools.client.models.ServiceConfigurationBillingUnit
-import createDataStore
 import consumption_data.composeapp.generated.resources.Res
 import consumption_data.composeapp.generated.resources.eye_off_outline
 import consumption_data.composeapp.generated.resources.eye_outline
@@ -92,7 +85,6 @@ import consumption_data.composeapp.generated.resources.heat_device
 import consumption_data.composeapp.generated.resources.water_device
 import org.jetbrains.compose.resources.vectorResource
 import org.openapitools.client.models.Service
-import org.openapitools.client.models.UnitOfMeasure
 import ui.theme.AppTheme
 import kotlin.math.min
 
@@ -497,7 +489,7 @@ fun BillingUnitCardRow(
     ) {
         if (value2 != null) {
             Row(modifier = Modifier.weight(0.6f)) {
-                Text(key, style = MaterialTheme.typography.bodyMedium)
+                Text(key, style = MaterialTheme.typography.titleMedium)
             }
             Row(modifier = Modifier.weight(0.4f)) {
                 Text(text = value, style = MaterialTheme.typography.bodyMedium)
@@ -505,7 +497,7 @@ fun BillingUnitCardRow(
                 Text(text = value2, style = MaterialTheme.typography.bodyMedium)
             }
         } else {
-            Text(key, style = MaterialTheme.typography.bodyMedium)
+            Text(key, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.weight(1f))
             Text(text = value, style = MaterialTheme.typography.bodyMedium)
         }
@@ -587,7 +579,7 @@ fun BillingUnitCard(
                 BillingUnitCardRow("Residential", selector.residentialUnit.mscnumber)
             }
 
-            Text("Consumption", style = MaterialTheme.typography.titleLarge)
+            Text("Consumption", style = MaterialTheme.typography.titleMedium)
             if (minConsumption != null) {
                 BillingUnitCardRow(
                     "Min",
@@ -620,6 +612,8 @@ fun VerticalChart(
         service = selector.service,
         unitOfMeassure = consumptions.first().unitofmeasure
     )
+    val chartDisplay by viewModel.chartDisplay.collectAsState()
+
     years.forEach { year ->
         if (showYears.contains(year)) {
             val sum = viewModel.yearSumConsumptionOfUnit(selector, year)
@@ -638,39 +632,42 @@ fun VerticalChart(
             )
         }
     }
-
-    VerticalYearChart(yearChart)
-
-    val monthChart = MonthChartData(
-        service = selector.service,
-        unitOfMeassure = consumptions.first().unitofmeasure
-    )
-    consumptions.forEach { consumption ->
-        val period = Period(consumption.period)
-        if (showYears.contains(period.year())) {
-            monthChart.addConsumption(
-                period.year(), period.month(), ChartConsumption(
-                    consumption.amount ?: 0.0,
-                    period.month(),
-                    consumption.period,
-                    selector.service,
-                    consumption.unitofmeasure,
-                    selector.billingUnit,
-                    selector.residentialUnit
-                )
-            )
-        }
+    if (chartDisplay == ChartDisplay.Yearly) {
+        VerticalYearChart(yearChart)
     }
-    VerticalMonthChart(
-        monthChart,
-        yearChart.sortedYears()
-    )
 
-    yearChart.sortedYears().forEach { year ->
+    if (chartDisplay == ChartDisplay.Monthly) {
+        val monthChart = MonthChartData(
+            service = selector.service,
+            unitOfMeassure = consumptions.first().unitofmeasure
+        )
+        consumptions.forEach { consumption ->
+            val period = Period(consumption.period)
+            if (showYears.contains(period.year())) {
+                monthChart.addConsumption(
+                    period.year(), period.month(), ChartConsumption(
+                        consumption.amount ?: 0.0,
+                        period.month(),
+                        consumption.period,
+                        selector.service,
+                        consumption.unitofmeasure,
+                        selector.billingUnit,
+                        selector.residentialUnit
+                    )
+                )
+            }
+        }
         VerticalMonthChart(
             monthChart,
-            listOf(year)
+            yearChart.sortedYears()
         )
+
+        yearChart.sortedYears().forEach { year ->
+            VerticalMonthChart(
+                monthChart,
+                listOf(year)
+            )
+        }
     }
 }
 
@@ -682,10 +679,13 @@ fun HorizontalChart(
     years: List<String>,
     showYears: List<String>
 ) {
+    val chartDisplay by viewModel.chartDisplay.collectAsState()
+
     val yearChart = YearChartData(
         service = selector.service,
         unitOfMeassure = consumptions.first().unitofmeasure
     )
+
     years.forEach { year ->
         if (showYears.contains(year)) {
             val sum = viewModel.yearSumConsumptionOfUnit(selector, year)
@@ -705,37 +705,41 @@ fun HorizontalChart(
         }
     }
 
-    HorizontalYearChart(yearChart)
-
-    val monthChart = MonthChartData(
-        service = selector.service,
-        unitOfMeassure = consumptions.first().unitofmeasure
-    )
-    consumptions.forEach { consumption ->
-        val period = Period(consumption.period)
-        if (showYears.contains(period.year())) {
-            monthChart.addConsumption(
-                period.year(), period.month(), ChartConsumption(
-                    consumption.amount ?: 0.0,
-                    period.month(),
-                    consumption.period,
-                    selector.service,
-                    consumption.unitofmeasure,
-                    selector.billingUnit,
-                    selector.residentialUnit
-                )
-            )
-        }
+    if (chartDisplay == ChartDisplay.Yearly) {
+        HorizontalYearChart(yearChart)
     }
 
-    HorizontalMonthChart(monthChart, yearChart.sortedYears(), 30.dp)
-
-    yearChart.sortedYears().forEach { year ->
-        HorizontalMonthChart(
-            monthChart,
-            listOf(year),
-            30.dp
+    if (chartDisplay == ChartDisplay.Monthly) {
+        val monthChart = MonthChartData(
+            service = selector.service,
+            unitOfMeassure = consumptions.first().unitofmeasure
         )
+        consumptions.forEach { consumption ->
+            val period = Period(consumption.period)
+            if (showYears.contains(period.year())) {
+                monthChart.addConsumption(
+                    period.year(), period.month(), ChartConsumption(
+                        consumption.amount ?: 0.0,
+                        period.month(),
+                        consumption.period,
+                        selector.service,
+                        consumption.unitofmeasure,
+                        selector.billingUnit,
+                        selector.residentialUnit
+                    )
+                )
+            }
+        }
+
+        HorizontalMonthChart(monthChart, yearChart.sortedYears(), ChartProperties.maxBarHeightMonthly)
+
+        yearChart.sortedYears().forEach { year ->
+            HorizontalMonthChart(
+                monthChart,
+                listOf(year),
+                ChartProperties.maxBarHeightMonthly
+            )
+        }
     }
 }
 
@@ -747,7 +751,6 @@ fun PopupBox(
 ) {
 
     if (showPopup) {
-        // popup
         Popup(
             alignment = Alignment.Center,
             properties = PopupProperties(
@@ -780,6 +783,7 @@ fun ConsumptionScreen(
     modifier: Modifier = Modifier
 ) {
     val chartStyle by viewModel.chartStle.collectAsState()
+    val chartDisplay by viewModel.chartDisplay.collectAsState()
     val showYears by viewModel.showYears.collectAsState()
     val showYearsCopy = mutableListOf<String>()
     showYearsCopy.addAll(showYears)
@@ -816,16 +820,38 @@ fun ConsumptionScreen(
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
+        Row(modifier = modifier.fillMaxWidth()) {
+            Button(
+                shape = if (chartDisplay == ChartDisplay.Yearly) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+                colors = if (chartDisplay == ChartDisplay.Yearly) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+                elevation = if (chartDisplay == ChartDisplay.Yearly) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+                onClick = { viewModel.setChartDisplay(ChartDisplay.Yearly) }) {
+                Text(
+                    "Yearly",
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Button(
+                shape = if (chartDisplay == ChartDisplay.Monthly) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+                colors = if (chartDisplay == ChartDisplay.Monthly) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+                elevation = if (chartDisplay == ChartDisplay.Monthly) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+                onClick = { viewModel.setChartDisplay(ChartDisplay.Monthly) }) {
+                Text(
+                    "Monthly",
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(10.dp))
         if (years.size > MainViewModel.MAX_SHOW_YEARS) {
             Text(
-                text = "You can only show " + MainViewModel.MAX_SHOW_YEARS + " years",
+                text = "You can only show " + MainViewModel.MAX_SHOW_YEARS + " years at the same time",
                 style = MaterialTheme.typography.bodySmall
             )
             Spacer(modifier = Modifier.height(10.dp))
         }
         Row(modifier = modifier.fillMaxWidth()) {
-            for (year in years.reversed().subList(0, min(MainViewModel.MAX_SHOW_YEARS, years.size))
-                .reversed()) {
+            val yearsList = if (years.size > MainViewModel.MAX_SHOW_YEARS) showYearsCopy else years
+            for (year in yearsList) {
                 val inShowYEars = showYearsCopy.contains(year)
                 val yearButtonColors = ButtonColors(
                     yearColors[year.toInt() % yearColors.size] /*uttonDefaults.buttonColors().containerColor*/,
@@ -861,9 +887,16 @@ fun ConsumptionScreen(
                     onClick = {
                         showYearPopup = true
                     }) {
-                    Text(
-                        "...",
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = null
+                        )
+                        Icon(
+                            imageVector = Icons.Filled.ArrowDropDown,
+                            contentDescription = null
+                        )
+                    }
                     PopupBox(
                         showPopup = showYearPopup,
                         onClickOutside = { showYearPopup = false },

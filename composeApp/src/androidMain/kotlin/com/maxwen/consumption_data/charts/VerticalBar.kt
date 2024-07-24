@@ -117,7 +117,7 @@ fun VerticalBar(
                 ),
         ) {
             if (showAmount && amountInline) {
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(25.dp))
                 Canvas(
                     modifier = Modifier
                         .requiredSize(height = maxWith, width = maxWith)

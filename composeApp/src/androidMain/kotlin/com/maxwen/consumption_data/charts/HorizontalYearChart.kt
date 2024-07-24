@@ -26,7 +26,7 @@ fun HorizontalYearChart(
     modifier: Modifier = Modifier
 ) {
     val yearColors = ChartProperties.yearColors
-    val barHeight = 40.dp
+    val barHeight = ChartProperties.maxBarHeightYearly
     val yearLabelWith = 45.dp
     val gridMainLineProperties = gridMainLineProperties()
     val gridScaleineProperties = gridScaleLineProperties()
@@ -47,11 +47,11 @@ fun HorizontalYearChart(
                 .fillMaxWidth()
                 .padding(top = 20.dp)
         ) {
-            Text(
-                "Years",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-            )
+//            Text(
+//                "Years",
+//                fontWeight = FontWeight.Bold,
+//                fontSize = 18.sp,
+//            )
 
             Column(
                 modifier

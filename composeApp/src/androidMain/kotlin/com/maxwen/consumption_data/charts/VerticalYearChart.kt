@@ -24,7 +24,7 @@ fun VerticalYearChart(
 ) {
     val yearColors = ChartProperties.yearColors
 
-    val barWith = 40.dp
+    val barWith = ChartProperties.maxBarWidthYearly
     val maxHeight = 300.dp
     val yearLabelHeight = 20.dp
     val gridMainLineProperties = gridMainLineProperties()
@@ -45,11 +45,11 @@ fun VerticalYearChart(
             .padding(top = 20.dp)
     ) {
 
-        Text(
-            "Years",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-        )
+//        Text(
+//            "Years",
+//            fontWeight = FontWeight.Bold,
+//            fontSize = 18.sp,
+//        )
         Text(text = yearChart.unitOfMeassure.toString(), modifier = Modifier.padding(top = 10.dp))
 
         Row(

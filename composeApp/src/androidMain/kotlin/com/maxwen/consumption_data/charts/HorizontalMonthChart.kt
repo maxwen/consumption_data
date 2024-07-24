@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maxwen.consumption.models.Period
+import com.maxwen.consumption_data.models.Period
 
 @Composable
 fun HorizontalMonthChart(
@@ -39,11 +39,13 @@ fun HorizontalMonthChart(
                 .fillMaxWidth()
                 .padding(top = 20.dp)
         ) {
-            Text(
-                years.joinToString(separator = ","),
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-            )
+            if (years.size == 1) {
+                Text(
+                    years.joinToString(separator = ","),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                )
+            }
             val maxAmount = monthChart.maxAmount()
             val barHeight = (maxBarHeight / years.size)
             val scaleUnit = monthChart.scaleUnit()

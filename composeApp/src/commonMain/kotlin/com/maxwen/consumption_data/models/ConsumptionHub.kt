@@ -1,10 +1,9 @@
-package com.maxwen.consumption.models
+package com.maxwen.consumption_data.models
 
 import io.ktor.client.statement.*
 import org.openapitools.client.apis.EedConsumptionApi
 import org.openapitools.client.infrastructure.ClientException
 import org.openapitools.client.infrastructure.ServerException
-import org.openapitools.client.infrastructure.isInformational
 import org.openapitools.client.models.*
 
 class ConsumptionHub {
@@ -146,7 +145,7 @@ class ConsumptionHub {
                                         service,
                                         c.unitofmeasure,
                                         c.errors,
-                                        "%.2f".format(c.amount).toDouble()
+                                        c.amount!!.toString(2).toDouble()
                                     )
                                     val i = consumptions.indexOf(e)
                                     if (i != -1) {
@@ -212,7 +211,7 @@ class ConsumptionHub {
                 sumAmount += it.amount!!
                 numAmount += 1
             }
-            return "%.2f".format(sumAmount / numAmount).toDouble()
+            return (sumAmount / numAmount).toString(2).toDouble()
         }
         return null
     }
@@ -226,7 +225,7 @@ class ConsumptionHub {
             consumptions.filter { it.amount != null && !it.errors }.forEach {
                 sumAmount += it.amount!!
             }
-            return "%.2f".format(sumAmount).toDouble()
+            return sumAmount.toString(2).toDouble()
         }
         return null
     }

@@ -1,4 +1,4 @@
-package com.maxwen.consumption.models
+package com.maxwen.consumption_data.models
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
@@ -7,6 +7,11 @@ import kotlinx.coroutines.flow.first
 enum class ChartStyle {
     Horizontal,
     Vertical
+}
+
+enum class ChartDisplay {
+    Yearly,
+    Monthly
 }
 
 object Settings {

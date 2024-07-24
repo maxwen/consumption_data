@@ -1,4 +1,4 @@
-package com.maxwen.consumption.models
+package com.maxwen.consumption_data.models
 
 import org.openapitools.client.models.BillingUnitReference
 import org.openapitools.client.models.ResidentialUnitReference

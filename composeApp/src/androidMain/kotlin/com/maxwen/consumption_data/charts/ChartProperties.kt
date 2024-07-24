@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.dp
 
 class ChartProperties {
     companion object {
@@ -14,6 +15,9 @@ class ChartProperties {
             Color(0x1c, 0x95, 0x88),
             Color(0xdf, 0x7e, 0x2b)
         )
+        val maxBarHeightMonthly = 30.dp
+        val maxBarHeightYearly = 30.dp
+        val maxBarWidthYearly = 30.dp
     }
 }
 
