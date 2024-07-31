@@ -21,6 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
@@ -793,7 +795,7 @@ fun ConsumptionScreen(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(5.dp))
         Row(modifier = modifier.fillMaxWidth()) {
             Button(
                 shape = if (chartDisplay == ChartDisplay.Yearly) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
@@ -804,7 +806,7 @@ fun ConsumptionScreen(
                     "Yearly",
                 )
             }
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(5.dp))
             Button(
                 shape = if (chartDisplay == ChartDisplay.Monthly) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
                 colors = if (chartDisplay == ChartDisplay.Monthly) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
@@ -815,13 +817,13 @@ fun ConsumptionScreen(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(5.dp))
         if (years.size > MainViewModel.MAX_SHOW_YEARS) {
             Text(
                 text = "You can only show " + MainViewModel.MAX_SHOW_YEARS + " years at the same time",
                 style = MaterialTheme.typography.bodySmall
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(5.dp))
         }
         Row(modifier = modifier.fillMaxWidth()) {
             val yearsList = if (years.size > MainViewModel.MAX_SHOW_YEARS) showYearsCopy else years
@@ -859,6 +861,10 @@ fun ConsumptionScreen(
             if (years.size > MainViewModel.MAX_SHOW_YEARS) {
                 Spacer(modifier = Modifier.weight(1f))
                 Button(
+                    contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
+                    shape = ButtonDefaults.filledTonalShape,
+                    colors = ButtonDefaults.filledTonalButtonColors(),
+                    elevation = ButtonDefaults.filledTonalButtonElevation(),
                     onClick = {
                         showYearPopup = true
                     }) {
@@ -868,14 +874,14 @@ fun ConsumptionScreen(
                             contentDescription = null
                         )
                         Icon(
-                            imageVector = Icons.Filled.ArrowDropDown,
+                            imageVector = if (showYearPopup) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                             contentDescription = null
                         )
                     }
                     PopupBox(
                         offset = IntOffset(
                             x = 0,
-                            y = LocalDensity.current.run { years.size * 40.dp.toPx() }.toInt()
+                            y = 0, /*LocalDensity.current.run { years.size * 30.dp.toPx() }.toInt()*/
                         ),
                         showPopup = showYearPopup,
                         onClickOutside = { showYearPopup = false },
@@ -891,8 +897,8 @@ fun ConsumptionScreen(
                                 val inShowYEars = showYearsCopy.contains(year)
                                 Row(
                                     modifier = Modifier.padding(
-                                        start = 15.dp,
-                                        end = 15.dp,
+                                        start = 20.dp,
+                                        end = 20.dp,
                                         top = 2.dp,
                                         bottom = 2.dp
                                     )
@@ -919,12 +925,12 @@ fun ConsumptionScreen(
                                     }
                                 }
                             }
-                            Spacer(modifier = Modifier.height(15.dp))
-                            Button(onClick = {
-                                showYearPopup = false
-                            }) {
-                                Text(text = "Close")
-                            }
+//                            Spacer(modifier = Modifier.height(15.dp))
+//                            Button(onClick = {
+//                                showYearPopup = false
+//                            }) {
+//                                Text(text = "Close")
+//                            }
                             Spacer(modifier = Modifier.height(5.dp))
                         })
 

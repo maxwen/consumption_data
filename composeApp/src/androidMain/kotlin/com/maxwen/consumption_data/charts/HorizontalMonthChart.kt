@@ -153,7 +153,7 @@ fun HorizontalMonthChart(
                                     }
                                 })
                         }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column {
                             years.forEach { year ->
                                 val chartConsumption =
                                     monthChart.monthConsumption(Period.make(year, month))

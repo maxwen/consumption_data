@@ -1,5 +1,10 @@
 package com.maxwen.consumption_data.charts
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -17,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,22 +63,24 @@ fun VerticalBar(
     } else {
         (amount - minAmount) / amountRange
     }
-    val screenFraction =  Dp((maxHeight.value * amountFraction).toFloat())
+    val screenFraction = Dp((maxHeight.value * amountFraction).toFloat())
     val availSpace = maxHeight - screenFraction
 
     val textMeasurer = rememberTextMeasurer()
     val fontSize = 16.sp
 
-    val textLayoutResult: TextLayoutResult =
-        textMeasurer.measure(
-            text = amount.toString(), style = TextStyle(
-                fontSize = fontSize,
-                textAlign = TextAlign.Center,
-            )
+    val textLayoutResult: TextLayoutResult = textMeasurer.measure(
+        text = amount.toString(), style = TextStyle(
+            fontSize = fontSize,
+            textAlign = TextAlign.Center,
         )
+    )
     val textSize = textLayoutResult.size
     val amountInline = with(LocalDensity.current) { availSpace.toPx() } < textSize.width * 1.5
     val textColor = MaterialTheme.colorScheme.onBackground
+
+    val expandedState = remember { MutableTransitionState(false) }
+    expandedState.targetState = true
 
     Column(
         modifier
@@ -81,10 +89,10 @@ fun VerticalBar(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.weight(1.0f))
+
         if (showAmount && !amountInline) {
             Canvas(
-                modifier = Modifier
-                    .requiredSize(height = maxWith, width = maxWith)
+                modifier = Modifier.requiredSize(height = maxWith, width = maxWith)
             ) {
                 withTransform({
                     rotate(degrees = -90F)
@@ -106,43 +114,48 @@ fun VerticalBar(
             }
             Spacer(modifier = Modifier.height(10.dp))
         }
-        Column(
-            modifier
-                .width(maxWith)
-                .height(screenFraction)
-                .padding(start = 1.dp, end = 1.dp)
-                .background(
-                    color,
-                    shape = RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp)
-                ),
-        ) {
-            if (showAmount && amountInline) {
-                Spacer(modifier = Modifier.height(25.dp))
-                Canvas(
-                    modifier = Modifier
-                        .requiredSize(height = maxWith, width = maxWith)
+        if (expandedState.currentState || expandedState.targetState || !expandedState.isIdle) {
+            AnimatedVisibility(
+                visibleState = expandedState, enter = expandVertically(),
+                exit = fadeOut(),
+            ) {
+                Column(
+                    modifier
+                        .width(maxWith)
+                        .height(screenFraction)
+                        .padding(start = 1.dp, end = 1.dp)
+                        .background(
+                            color, shape = RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp)
+                        ),
                 ) {
-                    withTransform({
-                        rotate(degrees = -90F)
-                    }) {
-                        val yOffset = (size.width - textSize.height) / 2f
-                        drawText(
-                            textMeasurer,
-                            amount.toString(),
-                            softWrap = false,
-                            overflow = TextOverflow.Visible,
-                            style = TextStyle(
-                                fontSize = fontSize,
-                                color = textColor,
-                                textAlign = TextAlign.Center,
-                            ),
-                            topLeft = Offset(x = 0f, y = yOffset)
-                        )
+                    if (showAmount && amountInline) {
+                        Spacer(modifier = Modifier.height(25.dp))
+                        Canvas(
+                            modifier = Modifier.requiredSize(height = maxWith, width = maxWith)
+                        ) {
+                            withTransform({
+                                rotate(degrees = -90F)
+                            }) {
+                                val yOffset = (size.width - textSize.height) / 2f
+                                drawText(
+                                    textMeasurer,
+                                    amount.toString(),
+                                    softWrap = false,
+                                    overflow = TextOverflow.Visible,
+                                    style = TextStyle(
+                                        fontSize = fontSize,
+                                        color = textColor,
+                                        textAlign = TextAlign.Center,
+                                    ),
+                                    topLeft = Offset(x = 0f, y = yOffset)
+                                )
+                            }
+                        }
                     }
+                    Spacer(modifier = Modifier.weight(1f))
+
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
-
         }
     }
 }

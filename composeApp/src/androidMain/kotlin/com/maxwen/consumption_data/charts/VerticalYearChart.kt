@@ -56,6 +56,8 @@ fun VerticalYearChart(
             modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp)
+                // must include top padding
+                .height(maxHeight + 20.dp)
                 .drawWithContent {
                     drawLine(
                         strokeWidth = gridMainLineProperties.first,

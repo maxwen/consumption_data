@@ -90,6 +90,9 @@ fun VerticalMonthChart(
             Row(
                 modifier
                     .fillMaxWidth()
+                    .padding(top = 10.dp)
+                    // must include top padding
+                    .height(maxHeight + 20.dp)
                     .drawWithContent {
                         drawLine(
                             strokeWidth = gridMainLineProperties.first,
@@ -176,7 +179,7 @@ fun VerticalMonthChart(
                                         }
                                     })
                             PopupBox(
-                                offset = IntOffset(y = LocalDensity.current.run { -90.dp.toPx() }
+                                offset = IntOffset(y = LocalDensity.current.run { years.size * -30.dp.toPx() }
                                     .toInt(), x = 0),
                                 showPopup = showMultiMonthPopup == month,
                                 onClickOutside = { showMultiMonthPopup = 0 },
