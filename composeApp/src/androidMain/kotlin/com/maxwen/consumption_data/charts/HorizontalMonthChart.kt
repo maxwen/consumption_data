@@ -1,20 +1,31 @@
 package com.maxwen.consumption_data.charts
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maxwen.consumption_data.models.Period
@@ -30,7 +41,9 @@ fun HorizontalMonthChart(
     val monthLabelWith = 40.dp
     val gridMainLineProperties = gridMainLineProperties()
     val gridScaleineProperties = gridScaleLineProperties()
-
+    var showMultiMonthPopup by rememberSaveable {
+        mutableIntStateOf(0)
+    }
     BoxWithConstraints {
         val barWith = maxWidth - monthLabelWith
 
@@ -98,11 +111,48 @@ fun HorizontalMonthChart(
                     }
             ) {
                 for (month in 1..12) {
+                    Spacer(modifier = Modifier.height(5.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            Period.month(month),
-                            modifier = Modifier.width(monthLabelWith)
-                        )
+                        Box {
+                            Text(
+                                Period.month(month),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .width(monthLabelWith)
+                                    .clickable {
+                                        if (years.size > 1) {
+                                            if (showMultiMonthPopup != 0) {
+                                                showMultiMonthPopup = 0
+                                            }
+                                            showMultiMonthPopup = month
+                                        }
+                                    }
+                            )
+                            PopupBox(
+                                offset = IntOffset(x = LocalDensity.current.run { 60.dp.toPx() }.toInt(), y=0),
+                                showPopup = showMultiMonthPopup == month,
+                                onClickOutside = { showMultiMonthPopup = 0 },
+                                content = {
+                                    Spacer(modifier = Modifier.height(5.dp))
+                                    for (year in years) {
+                                        val chartConsumption =
+                                            monthChart.monthConsumption(Period.make(year, month))
+                                        Row(
+                                            modifier = Modifier.padding(
+                                                start = 15.dp,
+                                                end = 15.dp,
+                                                top = 5.dp,
+                                                bottom = 5.dp
+                                            )
+                                        ) {
+                                            Text(
+                                                chartConsumption?.amount?.toString() ?: "0.0",
+                                                color = yearColors[year.toInt() % yearColors.size],
+                                            )
+                                        }
+                                    }
+                                })
+                        }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             years.forEach { year ->
                                 val chartConsumption =

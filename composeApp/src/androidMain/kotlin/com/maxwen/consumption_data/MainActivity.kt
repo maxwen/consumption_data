@@ -5,8 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -48,14 +47,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.NavHostController
@@ -74,6 +73,7 @@ import com.maxwen.consumption_data.charts.ChartProperties
 import com.maxwen.consumption_data.charts.HorizontalMonthChart
 import com.maxwen.consumption_data.charts.HorizontalYearChart
 import com.maxwen.consumption_data.charts.MonthChartData
+import com.maxwen.consumption_data.charts.PopupBox
 import com.maxwen.consumption_data.charts.VerticalMonthChart
 import com.maxwen.consumption_data.charts.VerticalYearChart
 import com.maxwen.consumption_data.charts.YearChartData
@@ -731,7 +731,11 @@ fun HorizontalChart(
             }
         }
 
-        HorizontalMonthChart(monthChart, yearChart.sortedYears(), ChartProperties.maxBarHeightMonthly)
+        HorizontalMonthChart(
+            monthChart,
+            yearChart.sortedYears(),
+            ChartProperties.maxBarHeightMonthly
+        )
 
         yearChart.sortedYears().forEach { year ->
             HorizontalMonthChart(
@@ -739,36 +743,6 @@ fun HorizontalChart(
                 listOf(year),
                 ChartProperties.maxBarHeightMonthly
             )
-        }
-    }
-}
-
-@Composable
-fun PopupBox(
-    showPopup: Boolean,
-    onClickOutside: () -> Unit,
-    content: @Composable() () -> Unit
-) {
-
-    if (showPopup) {
-        Popup(
-            alignment = Alignment.Center,
-            properties = PopupProperties(
-                excludeFromSystemGesture = true,
-            ),
-            // to dismiss on click outside
-            onDismissRequest = { onClickOutside() }
-        ) {
-            Column(
-                Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceContainer,
-                        shape = RoundedCornerShape(10.dp, 10.dp, 10.dp, 10.dp)
-                    ),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                content()
-            }
         }
     }
 }
@@ -861,6 +835,7 @@ fun ConsumptionScreen(
                 )
 
                 Button(
+                    contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
                     shape = if (inShowYEars) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
                     colors = if (inShowYEars) yearButtonColors else ButtonDefaults.filledTonalButtonColors(),
                     elevation = if (inShowYEars) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
@@ -898,6 +873,10 @@ fun ConsumptionScreen(
                         )
                     }
                     PopupBox(
+                        offset = IntOffset(
+                            x = 0,
+                            y = LocalDensity.current.run { years.size * 40.dp.toPx() }.toInt()
+                        ),
                         showPopup = showYearPopup,
                         onClickOutside = { showYearPopup = false },
                         content = {
@@ -914,11 +893,12 @@ fun ConsumptionScreen(
                                     modifier = Modifier.padding(
                                         start = 15.dp,
                                         end = 15.dp,
-                                        top = 5.dp,
-                                        bottom = 5.dp
+                                        top = 2.dp,
+                                        bottom = 2.dp
                                     )
                                 ) {
                                     Button(
+                                        contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
                                         shape = if (inShowYEars) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
                                         colors = if (inShowYEars) yearButtonColors else ButtonDefaults.filledTonalButtonColors(),
                                         elevation = if (inShowYEars) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
