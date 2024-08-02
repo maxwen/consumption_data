@@ -29,6 +29,11 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maxwen.consumption_data.models.Period
+import consumption_data.composeapp.generated.resources.Res
+import consumption_data.composeapp.generated.resources.avg_amount
+import consumption_data.composeapp.generated.resources.max_amount
+import consumption_data.composeapp.generated.resources.min_amount
+import consumption_data.composeapp.generated.resources.sum_amount
 
 @Composable
 fun HorizontalMonthChart(
@@ -59,7 +64,34 @@ fun HorizontalMonthChart(
                     fontSize = 18.sp,
                 )
             }
-            val maxAmount = monthChart.maxAmount()
+            Row(
+                modifier
+                    .fillMaxWidth()
+                    .padding(top = 5.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    monthChart.unitOfMeassure.value,
+                )
+            }
+            if (years.size == 1) {
+                val year = years.first()
+                Row(modifier = Modifier.padding(top = 10.dp)) {
+                    TextWithIcon(monthChart.minAmount(year).toString(), Res.drawable.min_amount)
+                    TextWithIcon(monthChart.maxAmount(year).toString(), Res.drawable.max_amount)
+                    TextWithIcon(monthChart.sumAmount(year).toString(), Res.drawable.sum_amount)
+                    TextWithIcon(monthChart.avgAmount(year).toString(), Res.drawable.avg_amount)
+                }
+            } else {
+                Row(modifier = Modifier.padding(top = 10.dp)) {
+                    TextWithIcon(monthChart.minAmountOfYears(years).toString(), Res.drawable.min_amount)
+                    TextWithIcon(monthChart.maxAmountOfYears(years).toString(), Res.drawable.max_amount)
+                    TextWithIcon(monthChart.sumAmountOfYears(years).toString(), Res.drawable.sum_amount)
+                    TextWithIcon(monthChart.avgAmountOfYears(years).toString(), Res.drawable.avg_amount)
+                }
+            }
+
+            val maxAmount = monthChart.maxAmountOfAllYears()
             val barHeight = (maxBarHeight / years.size)
             val scaleUnit = monthChart.scaleUnit()
             val scaleUnitFraction = if (scaleUnit == 0.0) {
@@ -129,7 +161,8 @@ fun HorizontalMonthChart(
                                     }
                             )
                             PopupBox(
-                                offset = IntOffset(x = LocalDensity.current.run { 60.dp.toPx() }.toInt(), y=0),
+                                offset = IntOffset(x = LocalDensity.current.run { 60.dp.toPx() }
+                                    .toInt(), y = 0),
                                 showPopup = showMultiMonthPopup == month,
                                 onClickOutside = { showMultiMonthPopup = 0 },
                                 content = {
@@ -184,16 +217,6 @@ fun HorizontalMonthChart(
                         }
                     }
                 }
-            }
-            Row(
-                modifier
-                    .fillMaxWidth()
-                    .padding(top = 5.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    monthChart.unitOfMeassure.value,
-                )
             }
         }
     }

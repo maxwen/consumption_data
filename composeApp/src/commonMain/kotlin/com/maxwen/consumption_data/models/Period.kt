@@ -1,18 +1,16 @@
 package com.maxwen.consumption_data.models
 
 import kotlinx.serialization.Serializable
-import kotlin.math.pow
-import kotlin.math.roundToInt
 
 @Serializable
 data class Period(val period: String) {
     companion object {
         fun make(year: String, month: Int): Period {
-            val monthString = month.toString(2)
+            val monthString = month.toStringWithLength(2)
             return Period("$year-$monthString")
         }
         fun month(month: Int): String {
-            return month.toString(2)
+            return month.toStringWithLength(2)
         }
     }
 

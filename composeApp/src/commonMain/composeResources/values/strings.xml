@@ -1,0 +1,5 @@
+<resources>
+    <string name="billing_unit_screen">bved consumption data</string>
+    <string name="settings_screen">Settings</string>
+    <string name="consumption_screen">Consumption</string>
+</resources>

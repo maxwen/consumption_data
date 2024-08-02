@@ -11,12 +11,12 @@ import kotlin.math.roundToInt
  * @param numOfDec number of decimal places to show (receiver is rounded to that number)
  * @return the String representation of the receiver up to numOfDec decimal places
  */
-fun Double.toString(numOfDec: Int): String {
+fun Double.toStringWithDec(numOfDec: Int): String {
     val integerDigits = this.toInt()
     val floatDigits = ((this - integerDigits) * 10f.pow(numOfDec)).roundToInt()
     return "${integerDigits}.${floatDigits}"
 }
 
-fun Int.toString(length: Int) : String {
+fun Int.toStringWithLength(length: Int) : String {
     return this.toString().padStart(length, '0')
 }

@@ -81,19 +81,29 @@ import com.maxwen.consumption_data.charts.VerticalYearChart
 import com.maxwen.consumption_data.charts.YearChartData
 import org.openapitools.client.models.ServiceConfigurationBillingUnit
 import consumption_data.composeapp.generated.resources.Res
+import consumption_data.composeapp.generated.resources.avg_amount
+import consumption_data.composeapp.generated.resources.billing_unit_screen
+import consumption_data.composeapp.generated.resources.consumption_screen
 import consumption_data.composeapp.generated.resources.eye_off_outline
 import consumption_data.composeapp.generated.resources.eye_outline
 import consumption_data.composeapp.generated.resources.heat_device
+import consumption_data.composeapp.generated.resources.max_amount
+import consumption_data.composeapp.generated.resources.min_amount
+import consumption_data.composeapp.generated.resources.settings_screen
+import consumption_data.composeapp.generated.resources.sum_amount
 import consumption_data.composeapp.generated.resources.water_device
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.openapitools.client.models.Service
 import ui.theme.AppTheme
 import kotlin.math.min
 
-enum class Screens() {
-    BillingUnitsScreen,
-    ConsumptionScreen,
-    SettingsScreen
+enum class Screens(val title: StringResource) {
+    BillingUnitsScreen(title = Res.string.billing_unit_screen),
+    ConsumptionScreen(title = Res.string.consumption_screen),
+    SettingsScreen(title = Res.string.settings_screen)
 }
 
 class MainActivity() : ComponentActivity() {
@@ -196,7 +206,7 @@ fun AppBar(
     modifier: Modifier = Modifier
 ) {
     TopAppBar(
-        title = { Text("") },
+        title = { Text(text = stringResource(currentScreen.title)) },
         colors = TopAppBarDefaults.mediumTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
@@ -483,6 +493,7 @@ fun BillingUnitCardRow(
     value: String,
     modifier: Modifier = Modifier,
     value2: String? = null,
+    icon: DrawableResource? = null
 ) {
     Row(
         modifier = modifier
@@ -490,18 +501,28 @@ fun BillingUnitCardRow(
             .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
     ) {
         if (value2 != null) {
-            Row(modifier = Modifier.weight(0.6f)) {
+            Row(modifier = Modifier.weight(0.6f), verticalAlignment = Alignment.CenterVertically) {
+                if (icon != null) {
+                    Icon(imageVector = vectorResource(icon), contentDescription = null)
+                    Spacer(modifier = Modifier.width(5.dp))
+                }
                 Text(key, style = MaterialTheme.typography.titleMedium)
             }
-            Row(modifier = Modifier.weight(0.4f)) {
+            Row(modifier = Modifier.weight(0.4f), verticalAlignment = Alignment.CenterVertically) {
                 Text(text = value, style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = value2, style = MaterialTheme.typography.bodyMedium)
             }
         } else {
-            Text(key, style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.weight(1f))
-            Text(text = value, style = MaterialTheme.typography.bodyMedium)
+            Row(modifier = Modifier.weight(0.6f), verticalAlignment = Alignment.CenterVertically) {
+                if (icon != null) {
+                    Icon(imageVector = vectorResource(icon), contentDescription = null)
+                    Spacer(modifier = Modifier.width(5.dp))
+                }
+                Text(key, style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = value, style = MaterialTheme.typography.bodyMedium)
+            }
         }
     }
 }
@@ -586,18 +607,18 @@ fun BillingUnitCard(
                 BillingUnitCardRow(
                     "Min",
                     minConsumption.first,
-                    value2 = minConsumption.second.toString()
+                    value2 = minConsumption.second.toString(), icon = Res.drawable.min_amount
                 )
             }
             if (maxConsumption != null) {
                 BillingUnitCardRow(
                     "Max",
                     maxConsumption.first,
-                    value2 = maxConsumption.second.toString()
+                    value2 = maxConsumption.second.toString(), icon = Res.drawable.max_amount
                 )
             }
-            BillingUnitCardRow("Average", avgConsumption.toString())
-            BillingUnitCardRow("Total", sumConsumption.toString())
+            BillingUnitCardRow("Average", avgConsumption.toString(), icon = Res.drawable.avg_amount)
+            BillingUnitCardRow("Total", sumConsumption.toString(), icon = Res.drawable.sum_amount)
         }
     }
 }

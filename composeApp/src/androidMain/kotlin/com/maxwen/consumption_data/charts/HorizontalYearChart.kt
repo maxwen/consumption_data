@@ -19,6 +19,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import consumption_data.composeapp.generated.resources.Res
+import consumption_data.composeapp.generated.resources.avg_amount
+import consumption_data.composeapp.generated.resources.max_amount
+import consumption_data.composeapp.generated.resources.min_amount
+import consumption_data.composeapp.generated.resources.sum_amount
 
 @Composable
 fun HorizontalYearChart(
@@ -52,6 +57,22 @@ fun HorizontalYearChart(
 //                fontWeight = FontWeight.Bold,
 //                fontSize = 18.sp,
 //            )
+            Row(
+                modifier
+                    .fillMaxWidth()
+                    .padding(top = 5.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    yearChart.unitOfMeassure.value,
+                )
+            }
+            Row(modifier = Modifier.padding(top = 10.dp)) {
+                TextWithIcon(yearChart.minAmount().toString(), Res.drawable.min_amount)
+                TextWithIcon(yearChart.maxAmount().toString(), Res.drawable.max_amount)
+                TextWithIcon(yearChart.sumAmount().toString(), Res.drawable.sum_amount)
+                TextWithIcon(yearChart.avgAmount().toString(), Res.drawable.avg_amount)
+            }
 
             Column(
                 modifier
@@ -129,16 +150,6 @@ fun HorizontalYearChart(
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                 }
-            }
-            Row(
-                modifier
-                    .fillMaxWidth()
-                    .padding(top = 5.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    yearChart.unitOfMeassure.value,
-                )
             }
         }
     }

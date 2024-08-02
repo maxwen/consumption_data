@@ -1,5 +1,6 @@
 package com.maxwen.consumption_data.charts
 
+import com.maxwen.consumption_data.models.toStringWithDec
 import org.openapitools.client.models.Service
 import org.openapitools.client.models.UnitOfMeasure
 import kotlin.math.pow
@@ -34,6 +35,26 @@ class YearChartData(
 
     fun maxAmount(): Double {
         return maxAmount
+    }
+
+    fun avgAmount(): Double {
+        var sumAmount: Double = Double.MIN_VALUE
+        var numAmount = 0
+
+        yearData.values.forEach { consumption ->
+            sumAmount += consumption.amount
+            numAmount += 1
+        }
+        return (sumAmount / numAmount).toStringWithDec(2).toDouble()
+    }
+
+    fun sumAmount(): Double {
+        var sumAmount: Double = Double.MIN_VALUE
+
+        yearData.values.forEach { consumption ->
+            sumAmount += consumption.amount
+        }
+        return sumAmount.toStringWithDec(2).toDouble()
     }
 
     fun scaleUnit() : Double {

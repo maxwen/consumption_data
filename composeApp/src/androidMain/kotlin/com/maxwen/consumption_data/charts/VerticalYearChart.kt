@@ -16,6 +16,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import consumption_data.composeapp.generated.resources.Res
+import consumption_data.composeapp.generated.resources.avg_amount
+import consumption_data.composeapp.generated.resources.max_amount
+import consumption_data.composeapp.generated.resources.min_amount
+import consumption_data.composeapp.generated.resources.sum_amount
 
 @Composable
 fun VerticalYearChart(
@@ -51,6 +56,12 @@ fun VerticalYearChart(
 //            fontSize = 18.sp,
 //        )
         Text(text = yearChart.unitOfMeassure.toString(), modifier = Modifier.padding(top = 10.dp))
+        Row(modifier = Modifier.padding(top = 10.dp)) {
+            TextWithIcon(yearChart.minAmount().toString(), Res.drawable.min_amount)
+            TextWithIcon(yearChart.maxAmount().toString(), Res.drawable.max_amount)
+            TextWithIcon(yearChart.sumAmount().toString(), Res.drawable.sum_amount)
+            TextWithIcon(yearChart.avgAmount().toString(), Res.drawable.avg_amount)
+        }
 
         Row(
             modifier

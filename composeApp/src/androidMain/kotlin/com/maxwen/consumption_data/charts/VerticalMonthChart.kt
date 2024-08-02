@@ -39,6 +39,11 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maxwen.consumption_data.models.Period
+import consumption_data.composeapp.generated.resources.Res
+import consumption_data.composeapp.generated.resources.avg_amount
+import consumption_data.composeapp.generated.resources.max_amount
+import consumption_data.composeapp.generated.resources.min_amount
+import consumption_data.composeapp.generated.resources.sum_amount
 
 @Composable
 fun VerticalMonthChart(
@@ -69,7 +74,23 @@ fun VerticalMonthChart(
         }
         Text(text = monthChart.unitOfMeassure.toString(), modifier = Modifier.padding(top = 10.dp))
 
-        val maxAmount = monthChart.maxAmount()
+        if (years.size == 1) {
+            val year = years.first()
+            Row(modifier = Modifier.padding(top = 10.dp)) {
+                TextWithIcon(monthChart.minAmount(year).toString(), Res.drawable.min_amount)
+                TextWithIcon(monthChart.maxAmount(year).toString(), Res.drawable.max_amount)
+                TextWithIcon(monthChart.sumAmount(year).toString(), Res.drawable.sum_amount)
+                TextWithIcon(monthChart.avgAmount(year).toString(), Res.drawable.avg_amount)
+            }
+        } else {
+            Row(modifier = Modifier.padding(top = 10.dp)) {
+                TextWithIcon(monthChart.minAmountOfYears(years).toString(), Res.drawable.min_amount)
+                TextWithIcon(monthChart.maxAmountOfYears(years).toString(), Res.drawable.max_amount)
+                TextWithIcon(monthChart.sumAmountOfYears(years).toString(), Res.drawable.sum_amount)
+                TextWithIcon(monthChart.avgAmountOfYears(years).toString(), Res.drawable.avg_amount)
+            }
+        }
+        val maxAmount = monthChart.maxAmountOfAllYears()
         val scaleUnit = monthChart.scaleUnit()
         val scaleUnitFraction = if (scaleUnit == 0.0) {
             0.0

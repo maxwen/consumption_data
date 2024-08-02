@@ -145,7 +145,7 @@ class ConsumptionHub {
                                         service,
                                         c.unitofmeasure,
                                         c.errors,
-                                        c.amount!!.toString(2).toDouble()
+                                        c.amount!!.toStringWithDec(2).toDouble()
                                     )
                                     val i = consumptions.indexOf(e)
                                     if (i != -1) {
@@ -211,7 +211,7 @@ class ConsumptionHub {
                 sumAmount += it.amount!!
                 numAmount += 1
             }
-            return (sumAmount / numAmount).toString(2).toDouble()
+            return (sumAmount / numAmount).toStringWithDec(2).toDouble()
         }
         return null
     }
@@ -225,7 +225,7 @@ class ConsumptionHub {
             consumptions.filter { it.amount != null && !it.errors }.forEach {
                 sumAmount += it.amount!!
             }
-            return sumAmount.toString(2).toDouble()
+            return sumAmount.toStringWithDec(2).toDouble()
         }
         return null
     }
