@@ -1,14 +1,9 @@
-package com.maxwen.consumption_data
+package com.maxwen.consumption_data.models
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maxwen.consumption_data.models.ChartDisplay
-import com.maxwen.consumption_data.models.ChartStyle
-import com.maxwen.consumption_data.models.ConsumptionEntity
-import com.maxwen.consumption_data.models.ConsumptionHub
-import com.maxwen.consumption_data.models.ConsumptionSelector
-import com.maxwen.consumption_data.models.Period
-import com.maxwen.consumption_data.models.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +14,7 @@ import org.openapitools.client.models.Service
 import org.openapitools.client.models.ServiceConfigurationBillingUnit
 import org.openapitools.client.models.UnitOfMeasure
 
-class MainViewModel : ViewModel() {
+class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
     companion object {
         const val MAX_SHOW_YEARS = 4
     }
@@ -52,6 +47,7 @@ class MainViewModel : ViewModel() {
     val chartDisplay: StateFlow<ChartDisplay> = _chartDisplay.asStateFlow()
 
     init {
+        Settings.myDataStore = prefs
         viewModelScope.launch {
             startProgress()
 

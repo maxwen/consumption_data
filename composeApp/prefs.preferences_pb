@@ -1,0 +1,9 @@
+
+
+setup
+%
+baseurl*http://192.168.1.70:8080
+
+username*foo
+
+password*bar

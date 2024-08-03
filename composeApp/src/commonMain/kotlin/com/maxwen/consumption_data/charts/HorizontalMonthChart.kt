@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maxwen.consumption_data.models.Period
+import com.maxwen.consumption_data.ui.PopupBox
+import com.maxwen.consumption_data.ui.TextWithIcon
 import consumption_data.composeapp.generated.resources.Res
 import consumption_data.composeapp.generated.resources.avg_amount
 import consumption_data.composeapp.generated.resources.max_amount

@@ -1,4 +1,4 @@
-package com.maxwen.consumption_data.charts
+package com.maxwen.consumption_data.ui
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
