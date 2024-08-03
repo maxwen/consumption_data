@@ -11,7 +11,7 @@ fun main() = application {
         title = "consumption_data",
     ) {
         App(prefs = remember {
-            createDataStore { DATA_STORE_FILE_NAME }
+            createDataStore()
         })
     }
 }
