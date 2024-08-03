@@ -1,7 +1,13 @@
 package com.maxwen.consumption_data.ui
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,7 +51,7 @@ fun App(
             startDestination = Screens.BillingUnitsScreen.name,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(top = innerPadding.calculateTopPadding(), start = 10.dp, end = 10.dp)
         ) {
             composable(route = Screens.BillingUnitsScreen.name) {
                 BillingUnitsScreen(
@@ -53,7 +59,6 @@ fun App(
                     navController,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(start = 10.dp, end = 10.dp)
                 )
             }
             composable(route = Screens.ConsumptionScreen.name) {
@@ -72,7 +77,6 @@ fun App(
                     years,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(start = 10.dp, end = 10.dp)
                 )
             }
             composable(route = Screens.SettingsScreen.name) {
@@ -81,7 +85,6 @@ fun App(
                     navController,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(10.dp)
                 )
             }
         }

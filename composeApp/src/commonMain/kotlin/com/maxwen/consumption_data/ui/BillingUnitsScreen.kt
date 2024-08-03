@@ -1,7 +1,11 @@
 package com.maxwen.consumption_data.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -28,7 +32,6 @@ fun BillingUnitsScreen(
     val squashResidentialUnits by viewModel.squashResidentialUnits.collectAsState()
 
     Column(
-        modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (!isSetupDone) {
@@ -38,7 +41,6 @@ fun BillingUnitsScreen(
         } else if (loaded) {
             Column(
                 Modifier
-                    .fillMaxWidth()
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -99,6 +101,11 @@ fun BillingUnitsScreen(
                             }
                     }
                 }
+                Spacer(
+                    Modifier.windowInsetsBottomHeight(
+                        WindowInsets.navigationBars
+                    )
+                )
             }
         } else if (loadError) {
             LoadErrorScreen(viewModel, navHostController, modifier)

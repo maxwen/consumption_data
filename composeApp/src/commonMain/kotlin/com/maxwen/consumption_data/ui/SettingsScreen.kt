@@ -34,7 +34,10 @@ fun SettingsScreen(
     navHostController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier.padding(top = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         val baseUrl by viewModel.baseurl.collectAsState()
         val username by viewModel.username.collectAsState()
         val password by viewModel.password.collectAsState()
