@@ -6,7 +6,10 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
+import com.maxwen.consumption_data.DATA_STORE_FILE_NAME
+import com.maxwen.consumption_data.createDataStore
 
+@OptIn(ExperimentalForeignApi::class)
 fun createDataStore(): DataStore<Preferences> {
     return createDataStore {
         val directory = NSFileManager.defaultManager.URLForDirectory(
