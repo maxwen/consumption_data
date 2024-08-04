@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -24,6 +25,7 @@ fun AppBar(
     navHostController: NavHostController,
     currentScreen: Screens,
     canNavigateBack: Boolean,
+    scrollBehavior: TopAppBarScrollBehavior,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -60,6 +62,7 @@ fun AppBar(
                     )
                 }
             }
-        }
+        },
+        scrollBehavior = scrollBehavior
     )
 }
