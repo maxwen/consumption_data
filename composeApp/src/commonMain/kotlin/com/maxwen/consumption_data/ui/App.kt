@@ -53,7 +53,7 @@ fun App(
         backStackEntry?.destination?.route ?: Screens.BillingUnitsScreen.name
     )
     val scrollBehavior =
-        if (getPlatform().type == PlatformType.Android) TopAppBarDefaults.enterAlwaysScrollBehavior(
+        if (getPlatform().type != PlatformType.Desktop) TopAppBarDefaults.enterAlwaysScrollBehavior(
             rememberTopAppBarState()
         )
         else TopAppBarDefaults.pinnedScrollBehavior(

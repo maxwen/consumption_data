@@ -6,6 +6,7 @@ import androidx.compose.ui.window.application
 import com.maxwen.consumption_data.DATA_STORE_FILE_NAME
 import com.maxwen.consumption_data.createDataStore
 import com.maxwen.consumption_data.ui.App
+import com.maxwen.consumption_data.ui.theme.AppTheme
 import consumption_data.composeapp.generated.resources.Res
 import consumption_data.composeapp.generated.resources.billing_unit_screen
 import consumption_data.composeapp.generated.resources.settings_screen
@@ -17,8 +18,10 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = stringResource(Res.string.billing_unit_screen),
     ) {
-        App(prefs = remember {
-            createDataStore()
-        })
+        AppTheme {
+            App(prefs = remember {
+                createDataStore()
+            })
+        }
     }
 }

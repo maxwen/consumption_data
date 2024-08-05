@@ -32,7 +32,7 @@ fun AppBar(
     TopAppBar(
         title = { Text(text = stringResource(currentScreen.title)) },
         colors = TopAppBarDefaults.mediumTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         modifier = modifier,
         navigationIcon = {

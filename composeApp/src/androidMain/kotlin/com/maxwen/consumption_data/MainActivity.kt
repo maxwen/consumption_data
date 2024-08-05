@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
 import com.maxwen.consumption_data.models.MainViewModel
 import com.maxwen.consumption_data.ui.App
-import ui.theme.AppTheme
+import com.maxwen.consumption_data.ui.theme.AppTheme
 
 class MainActivity() : ComponentActivity() {
 

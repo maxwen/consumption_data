@@ -1,4 +1,4 @@
-package ui.theme
+package com.maxwen.consumption_data.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

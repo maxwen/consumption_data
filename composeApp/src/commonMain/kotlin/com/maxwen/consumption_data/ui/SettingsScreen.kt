@@ -35,7 +35,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.padding(top = 10.dp),
+        modifier = modifier.padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val baseUrl by viewModel.baseurl.collectAsState()
