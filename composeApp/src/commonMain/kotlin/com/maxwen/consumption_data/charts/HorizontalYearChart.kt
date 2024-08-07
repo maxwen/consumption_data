@@ -99,7 +99,7 @@ fun HorizontalYearChart(
                                     x = scaleUnitLine,
                                     y = size.height
                                 ),
-                                pathEffect = getScaleLinePathEffect()
+                                pathEffect = gridScaleLinePathEffect()
                             )
                         }
 

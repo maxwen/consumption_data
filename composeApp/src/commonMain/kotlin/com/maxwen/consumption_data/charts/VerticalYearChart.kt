@@ -100,7 +100,7 @@ fun VerticalYearChart(
                                 x = size.width,
                                 y = scaleUnitLine
                             ),
-                            pathEffect = getScaleLinePathEffect()
+                            pathEffect = gridScaleLinePathEffect()
                         )
                     }
                     this@drawWithContent.drawContent()

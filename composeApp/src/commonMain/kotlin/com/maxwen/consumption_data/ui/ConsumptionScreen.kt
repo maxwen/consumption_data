@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
@@ -31,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -40,17 +42,33 @@ import com.maxwen.consumption_data.models.ChartStyle
 import com.maxwen.consumption_data.models.ConsumptionEntity
 import com.maxwen.consumption_data.models.ConsumptionSelector
 import com.maxwen.consumption_data.models.MainViewModel
+import consumption_data.composeapp.generated.resources.Res
+import consumption_data.composeapp.generated.resources.bar_chart
+import consumption_data.composeapp.generated.resources.month_display
+import consumption_data.composeapp.generated.resources.year_display
+import org.jetbrains.compose.resources.vectorResource
+import kotlin.math.min
 
 @Composable
 fun ConsumptionScreen(
     viewModel: MainViewModel,
     navHostController: NavHostController,
-    selector: ConsumptionSelector,
-    consumptions: List<ConsumptionEntity>,
-    years: List<String>,
     modifier: Modifier = Modifier
 ) {
-    val chartStyle by viewModel.chartStle.collectAsState()
+    val selector by viewModel.selector.collectAsState()
+    val consumptions = viewModel.getConsumptionOfUnit(selector)
+    val years = viewModel.yearListOfConsumptionData(selector)
+
+    if (!viewModel.isShowYearsInit && years.isNotEmpty()) {
+        viewModel.setShowYears(
+            years.reversed()
+                .subList(0, min(MainViewModel.MAX_SHOW_YEARS, years.size))
+                .reversed()
+        )
+        viewModel.isShowYearsInit = true
+    }
+
+    val chartStyle by viewModel.chartStyle.collectAsState()
     val chartDisplay by viewModel.chartDisplay.collectAsState()
     val showYears by viewModel.showYears.collectAsState()
     val showYearsCopy = mutableListOf<String>()
@@ -62,49 +80,90 @@ fun ConsumptionScreen(
 
     Column(
         modifier
+            .fillMaxHeight()
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(10.dp))
-        Row(modifier = modifier.fillMaxWidth()) {
+//        Row(modifier = modifier.fillMaxWidth()) {
+//            Button(
+//                contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
+//                shape = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+//                colors = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+//                elevation = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+//                onClick = { viewModel.setChartStyle(ChartStyle.Vertical) }) {
+//                Icon(
+//                    imageVector = vectorResource(Res.drawable.bar_chart),
+//                    contentDescription = null
+//                )
+//            }
+//            Spacer(modifier = Modifier.width(10.dp))
+//            Button(
+//                contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
+//                shape = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+//                colors = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+//                elevation = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+//                onClick = { viewModel.setChartStyle(ChartStyle.Horizontal) }) {
+//                Icon(
+//                    imageVector = vectorResource(Res.drawable.bar_chart),
+//                    contentDescription = null,
+//                    modifier = Modifier.rotate(90F)
+//                )
+//            }
+//        }
+//        Spacer(modifier = Modifier.height(5.dp))
+        Row(modifier = Modifier.fillMaxWidth()) {
             Button(
-                shape = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
-                colors = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
-                elevation = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
-                onClick = { viewModel.setChartStyle(ChartStyle.Vertical) }) {
-                Text(
-                    "Vertical",
-                )
-            }
-            Spacer(modifier = Modifier.width(10.dp))
-            Button(
-                shape = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
-                colors = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
-                elevation = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
-                onClick = { viewModel.setChartStyle(ChartStyle.Horizontal) }) {
-                Text(
-                    "Horizontal",
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(5.dp))
-        Row(modifier = modifier.fillMaxWidth()) {
-            Button(
+                contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
                 shape = if (chartDisplay == ChartDisplay.Yearly) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
                 colors = if (chartDisplay == ChartDisplay.Yearly) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
                 elevation = if (chartDisplay == ChartDisplay.Yearly) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
                 onClick = { viewModel.setChartDisplay(ChartDisplay.Yearly) }) {
-                Text(
-                    "Yearly",
+//                Text(
+//                    "Yearly",
+//                )
+                Icon(
+                    imageVector = vectorResource(Res.drawable.year_display),
+                    contentDescription = "Yearly"
                 )
             }
             Spacer(modifier = Modifier.width(5.dp))
             Button(
+                contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
                 shape = if (chartDisplay == ChartDisplay.Monthly) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
                 colors = if (chartDisplay == ChartDisplay.Monthly) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
                 elevation = if (chartDisplay == ChartDisplay.Monthly) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
                 onClick = { viewModel.setChartDisplay(ChartDisplay.Monthly) }) {
-                Text(
-                    "Monthly",
+//                Text(
+//                    "Monthly",
+//                )
+                Icon(
+                    imageVector = vectorResource(Res.drawable.month_display),
+                    contentDescription = "Monthly"
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Button(
+                contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
+                shape = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+                colors = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+                elevation = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+                onClick = { viewModel.setChartStyle(ChartStyle.Vertical) }) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.bar_chart),
+                    contentDescription = "Vertical"
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Button(
+                contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
+                shape = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+                colors = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+                elevation = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+                onClick = { viewModel.setChartStyle(ChartStyle.Horizontal) }) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.bar_chart),
+                    contentDescription = "Horizontal",
+                    modifier = Modifier.rotate(90F)
                 )
             }
         }
@@ -116,7 +175,7 @@ fun ConsumptionScreen(
             )
             Spacer(modifier = Modifier.height(5.dp))
         }
-        Row(modifier = modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth()) {
             val yearsList = if (years.size > MainViewModel.MAX_SHOW_YEARS) showYearsCopy else years
             for (year in yearsList) {
                 val inShowYEars = showYearsCopy.contains(year)
@@ -237,7 +296,7 @@ fun ConsumptionScreen(
                 consumptions,
                 chartStyle,
                 years,
-                showYears
+                showYears,
             )
         }
         Spacer(

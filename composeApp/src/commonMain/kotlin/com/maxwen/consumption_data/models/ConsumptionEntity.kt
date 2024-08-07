@@ -1,5 +1,6 @@
 package com.maxwen.consumption_data.models
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -33,6 +34,7 @@ class ConsumptionEntity(
                 }
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     override fun toString(): String {
         val prettyJson = Json { // this returns the JsonBuilder
             prettyPrint = true

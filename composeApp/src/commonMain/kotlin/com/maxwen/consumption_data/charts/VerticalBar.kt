@@ -124,7 +124,8 @@ fun VerticalBar(
                         .height(screenFraction)
                         .padding(start = 1.dp, end = 1.dp)
                         .background(
-                            color, shape = RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp)
+                            getVerticalBrush(color),
+                            shape = RoundedCornerShape(ChartProperties.barCornerRadius)
                         ),
                 ) {
                     if (showAmount && amountInline) {

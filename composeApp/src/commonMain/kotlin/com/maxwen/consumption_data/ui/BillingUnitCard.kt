@@ -58,7 +58,9 @@ fun BillingUnitCard(
             .padding(15.dp),
         onClick = {
             viewModel.setSelector(selector)
-            navHostController.navigate(Screens.ConsumptionScreen.name)
+            if (!viewModel.isTwoPaneMode) {
+                navHostController.navigate(Screens.ConsumptionScreen.name)
+            }
         }
     ) {
         Column(

@@ -6,7 +6,8 @@ interface Platform {
 enum class PlatformType {
     Android,
     Desktop,
-    iOS
+    iOS,
+    wasm
 }
 
 expect fun getPlatform(): Platform

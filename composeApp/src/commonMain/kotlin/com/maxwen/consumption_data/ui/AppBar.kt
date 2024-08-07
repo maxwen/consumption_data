@@ -13,10 +13,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.navigation.NavHostController
+import com.maxwen.consumption_data.models.ChartStyle
 import com.maxwen.consumption_data.models.MainViewModel
+import consumption_data.composeapp.generated.resources.Res
+import consumption_data.composeapp.generated.resources.bar_chart
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,6 +36,8 @@ fun AppBar(
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val chartStyle by viewModel.chartStyle.collectAsState()
+
     TopAppBar(
         title = { Text(text = stringResource(currentScreen.title)) },
         colors = TopAppBarDefaults.mediumTopAppBarColors(
@@ -46,7 +55,7 @@ fun AppBar(
             }
         },
         actions = {
-            if (currentScreen == Screens.BillingUnitsScreen) {
+            if (currentScreen == Screens.BillingUnitsScreen || viewModel.isTwoPaneMode) {
                 IconButton(onClick = { viewModel.reload() }) {
                     Icon(
                         imageVector = Icons.Outlined.Refresh,
@@ -54,6 +63,28 @@ fun AppBar(
                     )
                 }
             }
+
+            if (currentScreen == Screens.ConsumptionScreen || viewModel.isTwoPaneMode) {
+                IconButton(onClick = {
+                    if (chartStyle == ChartStyle.Vertical) viewModel.setChartStyle(
+                        ChartStyle.Horizontal
+                    ) else viewModel.setChartStyle(ChartStyle.Vertical)
+                }) {
+                    if (chartStyle == ChartStyle.Horizontal) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.bar_chart),
+                            contentDescription = "Horizontal"
+                        )
+                    } else {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.bar_chart),
+                            contentDescription = "Vertical",
+                            modifier = Modifier.rotate(90F)
+                        )
+                    }
+                }
+            }
+
             if (currentScreen != Screens.SettingsScreen) {
                 IconButton(onClick = { navHostController.navigate(Screens.SettingsScreen.name) }) {
                     Icon(

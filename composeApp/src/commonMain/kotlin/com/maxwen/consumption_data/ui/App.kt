@@ -1,30 +1,23 @@
 package com.maxwen.consumption_data.ui
 
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.datastore.core.DataStore
@@ -37,7 +30,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.maxwen.consumption_data.models.MainViewModel
 import getPlatform
-import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,9 +51,6 @@ fun App(
         else TopAppBarDefaults.pinnedScrollBehavior(
             rememberTopAppBarState()
         )
-
-
-    println("displayCutout = " + WindowInsets.displayCutout.toString())
 
     val displayCutoutLeft = LocalDensity.current.run {
         WindowInsets.displayCutout.getLeft(
@@ -109,27 +98,42 @@ fun App(
                 )
         ) {
             composable(route = Screens.BillingUnitsScreen.name) {
-                BillingUnitsScreen(
-                    viewModel,
-                    navController,
-                    modifier = Modifier
-                        .fillMaxSize()
-                )
+                BoxWithConstraints {
+                    println("maxWidth = " + maxWidth)
+                    viewModel.isTwoPaneMode = maxWidth > 480.dp
+                    if (viewModel.isTwoPaneMode) {
+                        Row {
+                            BillingUnitsScreen(
+                                viewModel,
+                                navController,
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .weight(0.5F)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            ConsumptionScreen(
+                                viewModel,
+                                navController,
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .weight(0.5F)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                        }
+                    } else {
+                        BillingUnitsScreen(
+                            viewModel,
+                            navController,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        )
+                    }
+                }
             }
             composable(route = Screens.ConsumptionScreen.name) {
-                val consumptions = viewModel.getConsumptionOfUnit(viewModel.getSelector())
-                val years = viewModel.yearListOfConsumptionData(viewModel.getSelector())
-
-                viewModel.setShowYears(
-                    years.reversed().subList(0, min(MainViewModel.MAX_SHOW_YEARS, years.size))
-                        .reversed()
-                )
                 ConsumptionScreen(
                     viewModel,
                     navController,
-                    viewModel.getSelector(),
-                    consumptions,
-                    years,
                     modifier = Modifier
                         .fillMaxSize()
                 )

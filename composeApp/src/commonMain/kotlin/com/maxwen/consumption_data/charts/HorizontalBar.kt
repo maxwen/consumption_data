@@ -81,8 +81,8 @@ fun HorizontalBar(
                         .height(maxHeight)
                         .padding(top = 1.dp, bottom = 1.dp)
                         .background(
-                            color,
-                            shape = RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp)
+                            getHorizontalBrush(color),
+                            shape = RoundedCornerShape(ChartProperties.barCornerRadius)
                         ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

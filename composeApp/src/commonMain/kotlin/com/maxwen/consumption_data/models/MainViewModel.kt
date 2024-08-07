@@ -18,6 +18,7 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
     companion object {
         const val MAX_SHOW_YEARS = 4
     }
+
     private val _loaded = MutableStateFlow(false)
     val loaded: StateFlow<Boolean> = _loaded.asStateFlow()
     private val _loadError = MutableStateFlow(false)
@@ -26,6 +27,8 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
     val progress: StateFlow<Boolean> = _progress.asStateFlow()
 
     private val _selector = MutableStateFlow(ConsumptionSelector())
+    val selector: StateFlow<ConsumptionSelector> = _selector.asStateFlow()
+
     private val data = ConsumptionHub()
     private val _squashResidentialUnits = MutableStateFlow(false)
     val squashResidentialUnits: StateFlow<Boolean> = _squashResidentialUnits.asStateFlow()
@@ -37,14 +40,17 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
     private val _isConfigComplete = MutableStateFlow(false)
     val isConfigComplete: StateFlow<Boolean> = _isConfigComplete.asStateFlow()
 
-    private val _chartStle = MutableStateFlow(ChartStyle.Vertical)
-    val chartStle: StateFlow<ChartStyle> = _chartStle.asStateFlow()
+    private val _chartStyle = MutableStateFlow(ChartStyle.Vertical)
+    val chartStyle: StateFlow<ChartStyle> = _chartStyle.asStateFlow()
 
     private val _showYears = MutableStateFlow(mutableListOf<String>())
     val showYears: StateFlow<List<String>> = _showYears.asStateFlow()
 
     private val _chartDisplay = MutableStateFlow(ChartDisplay.Yearly)
     val chartDisplay: StateFlow<ChartDisplay> = _chartDisplay.asStateFlow()
+
+    var isTwoPaneMode = false
+    var isShowYearsInit = false
 
     init {
         Settings.myDataStore = prefs
@@ -54,7 +60,7 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
             password.update { Settings.getPasword() }
             username.update { Settings.getUsername() }
             baseurl.update { Settings.getBaseUrl() }
-            _chartStle.update { Settings.getCharStyle() }
+            _chartStyle.update { Settings.getCharStyle() }
             _isSetupDone.update { Settings.isSetupDone() }
             _isConfigComplete.update { isConfigComplete() }
 
@@ -77,6 +83,7 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
             try {
                 _loadError.update { false }
                 data.load(baseurl.value, username.value, password.value)
+                setSelector(ConsumptionSelector())
                 _loaded.update { true }
             } catch (e: Throwable) {
                 if (isConfigComplete.value) {
@@ -96,7 +103,7 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
     }
 
     fun setChartStyle(style: ChartStyle) {
-        _chartStle.update { style }
+        _chartStyle.update { style }
         viewModelScope.launch {
             Settings.setChartStyle(style)
         }
@@ -161,10 +168,6 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
 
     fun setSelector(selector: ConsumptionSelector) {
         _selector.value = selector
-    }
-
-    fun getSelector(): ConsumptionSelector {
-        return _selector.value
     }
 
     fun getBillingUnits(): List<ServiceConfigurationBillingUnit> {
