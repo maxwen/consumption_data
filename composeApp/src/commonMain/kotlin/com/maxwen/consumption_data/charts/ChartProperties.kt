@@ -25,6 +25,8 @@ class ChartProperties {
         val maxBarHeightYearly = 30.dp
         val maxBarWidthYearly = 30.dp
         val barCornerRadius = 2.dp
+        // just approx in px for scroll to year
+        val chartHeaderHeight = 300
     }
 }
 

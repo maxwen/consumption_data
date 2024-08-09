@@ -67,12 +67,14 @@ fun VerticalChart(
             }
         }
         VerticalMonthChart(
+            viewModel,
             monthChart,
             yearChart.sortedYears()
         )
 
         yearChart.sortedYears().forEach { year ->
             VerticalMonthChart(
+                viewModel,
                 monthChart,
                 listOf(year)
             )

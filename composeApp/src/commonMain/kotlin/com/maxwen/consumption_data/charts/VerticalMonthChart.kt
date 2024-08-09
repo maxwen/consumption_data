@@ -1,6 +1,7 @@
 package com.maxwen.consumption_data.charts
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,6 +30,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maxwen.consumption_data.charts.ChartProperties.Companion.chartHeaderHeight
+import com.maxwen.consumption_data.models.MainViewModel
 import com.maxwen.consumption_data.models.Period
 import com.maxwen.consumption_data.ui.PopupBox
 import com.maxwen.consumption_data.ui.TextWithIcon
@@ -38,6 +43,7 @@ import consumption_data.composeapp.generated.resources.sum_amount
 
 @Composable
 fun VerticalMonthChart(
+    viewModel: MainViewModel,
     monthChart: MonthChartData,
     years: List<String>,
     modifier: Modifier = Modifier
@@ -50,9 +56,16 @@ fun VerticalMonthChart(
     var showMultiMonthPopup by rememberSaveable {
         mutableIntStateOf(0)
     }
+    val focusPeriod = viewModel.focusPeriod
 
     Column(
         modifier
+            .then(
+                if (years.size == 1 && focusPeriod.isNotEmpty() && years.contains(Period(focusPeriod).year()))
+                    Modifier.onGloballyPositioned { layoutCoordinates ->
+                        viewModel.setFocusPeriodPosition(layoutCoordinates.positionInRoot().y.toInt() - chartHeaderHeight)
+                    } else modifier
+            )
             .fillMaxWidth()
             .padding(top = 20.dp)
     ) {
@@ -67,14 +80,28 @@ fun VerticalMonthChart(
 
         if (years.size == 1) {
             val year = years.first()
-            Row(modifier = Modifier.padding(top = 10.dp)) {
+            Row(
+                modifier = Modifier.padding(top = 10.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    monthChart.unitOfMeassure.value,
+                )
+                Spacer(modifier = Modifier.width(10.dp))
                 TextWithIcon(monthChart.minAmount(year).toString(), Res.drawable.min_amount)
                 TextWithIcon(monthChart.maxAmount(year).toString(), Res.drawable.max_amount)
                 TextWithIcon(monthChart.sumAmount(year).toString(), Res.drawable.sum_amount)
                 TextWithIcon(monthChart.avgAmount(year).toString(), Res.drawable.avg_amount)
             }
         } else {
-            Row(modifier = Modifier.padding(top = 10.dp)) {
+            Row(
+                modifier = Modifier.padding(top = 10.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    monthChart.unitOfMeassure.value,
+                )
+                Spacer(modifier = Modifier.width(10.dp))
                 TextWithIcon(monthChart.minAmountOfYears(years).toString(), Res.drawable.min_amount)
                 TextWithIcon(monthChart.maxAmountOfYears(years).toString(), Res.drawable.max_amount)
                 TextWithIcon(monthChart.sumAmountOfYears(years).toString(), Res.drawable.sum_amount)

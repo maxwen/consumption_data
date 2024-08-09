@@ -99,8 +99,9 @@ fun App(
         ) {
             composable(route = Screens.BillingUnitsScreen.name) {
                 BoxWithConstraints {
-                    println("maxWidth = " + maxWidth)
-                    viewModel.isTwoPaneMode = maxWidth > 480.dp
+//                    println("maxWidth = " + maxWidth)
+                    viewModel.isTwoPaneMode =
+                        maxWidth > 800.dp /* TODO && getPlatform().type == PlatformType.Desktop*/
                     if (viewModel.isTwoPaneMode) {
                         Row {
                             BillingUnitsScreen(

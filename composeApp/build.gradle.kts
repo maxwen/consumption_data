@@ -58,6 +58,8 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.android)
+            api(libs.moko.permissions)
+            api(libs.moko.permissions.compose)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -80,6 +82,8 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            api(libs.moko.permissions)
+            api(libs.moko.permissions.compose)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -130,12 +134,12 @@ android {
     }
 }
 
+// fedora deps : java-21-openjdk-jmods rpm-build
 compose.desktop {
     application {
         mainClass = "MainKt"
-
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Rpm)
             packageName = "com.maxwen.consumption_data"
             packageVersion = "1.0.0"
         }

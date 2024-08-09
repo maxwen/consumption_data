@@ -1,5 +1,12 @@
 package com.maxwen.consumption_data.models
 
+import consumption_data.composeapp.generated.resources.Res
+import consumption_data.composeapp.generated.resources.cold_water_device
+import consumption_data.composeapp.generated.resources.cooling_device
+import consumption_data.composeapp.generated.resources.heating_device
+import consumption_data.composeapp.generated.resources.hot_water_device
+import org.jetbrains.compose.resources.DrawableResource
+import org.openapitools.client.models.Service
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -17,6 +24,24 @@ fun Double.toStringWithDec(numOfDec: Int): String {
     return "${integerDigits}.${floatDigits}"
 }
 
-fun Int.toStringWithLength(length: Int) : String {
+fun Int.toStringWithLength(length: Int): String {
     return this.toString().padStart(length, '0')
+}
+
+fun Service.icon(): DrawableResource {
+    return when (this) {
+        Service.COOLING -> {
+            Res.drawable.cooling_device
+        }
+        Service.HEATING -> {
+            Res.drawable.heating_device
+        }
+        Service.HOT_WATER -> {
+            Res.drawable.hot_water_device
+        }
+        Service.COLD_WATER -> {
+            Res.drawable.cold_water_device
+
+        }
+    }
 }

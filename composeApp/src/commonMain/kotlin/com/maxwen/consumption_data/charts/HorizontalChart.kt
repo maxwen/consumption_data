@@ -70,6 +70,7 @@ fun HorizontalChart(
         }
 
         HorizontalMonthChart(
+            viewModel,
             monthChart,
             yearChart.sortedYears(),
             ChartProperties.maxBarHeightMonthly
@@ -77,6 +78,7 @@ fun HorizontalChart(
 
         yearChart.sortedYears().forEach { year ->
             HorizontalMonthChart(
+                viewModel,
                 monthChart,
                 listOf(year),
                 ChartProperties.maxBarHeightMonthly

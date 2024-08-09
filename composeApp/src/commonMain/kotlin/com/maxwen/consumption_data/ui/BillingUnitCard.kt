@@ -1,5 +1,6 @@
 package com.maxwen.consumption_data.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,18 +17,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.maxwen.consumption_data.models.ChartDisplay
 import com.maxwen.consumption_data.models.ConsumptionSelector
 import com.maxwen.consumption_data.models.MainViewModel
+import com.maxwen.consumption_data.models.icon
 import consumption_data.composeapp.generated.resources.Res
 import consumption_data.composeapp.generated.resources.avg_amount
-import consumption_data.composeapp.generated.resources.heat_device
 import consumption_data.composeapp.generated.resources.max_amount
 import consumption_data.composeapp.generated.resources.min_amount
 import consumption_data.composeapp.generated.resources.sum_amount
-import consumption_data.composeapp.generated.resources.water_device
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.vectorResource
-import org.openapitools.client.models.Service
 import org.openapitools.client.models.ServiceConfigurationBillingUnit
 
 @Composable
@@ -73,31 +73,16 @@ fun BillingUnitCard(
                 Text(mscnumber, style = MaterialTheme.typography.titleLarge)
                 Spacer(modifier = Modifier.weight(1f))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    when (service) {
-                        Service.HEATING -> {
-                            Icon(
-                                imageVector = vectorResource(Res.drawable.heat_device),
-                                contentDescription = null
-                            )
-                        }
-
-                        Service.HOT_WATER -> {
-                            Icon(
-                                imageVector = vectorResource(Res.drawable.water_device),
-                                contentDescription = null
-                            )
-                        }
-
-                        Service.COOLING -> TODO()
-                        Service.COLD_WATER -> TODO()
-                    }
+                    Icon(
+                        imageVector = vectorResource(service.icon()),
+                        contentDescription = service.toString()
+                    )
                     Text(
                         modifier = Modifier.padding(start = 5.dp),
-                        text = selector.service.toString() + " " + selector.unitOfMeasure.toString(),
+                        text = selector.unitOfMeasure.toString(),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
-
             }
 
             BillingUnitCardRow("Start", (billingUnit.servicestart ?: ""))
@@ -112,14 +97,28 @@ fun BillingUnitCard(
                 BillingUnitCardRow(
                     "Min",
                     minConsumption.first,
-                    value2 = minConsumption.second.toString(), icon = Res.drawable.min_amount
+                    value2 = minConsumption.second.toString(), icon = Res.drawable.min_amount,
+                    modifier = Modifier.clickable {
+                        viewModel.setChartDisplay(ChartDisplay.Monthly)
+                        viewModel.setSelector(selector, minConsumption.first)
+                        if (!viewModel.isTwoPaneMode) {
+                            navHostController.navigate(Screens.ConsumptionScreen.name)
+                        }
+                    }
                 )
             }
             if (maxConsumption != null) {
                 BillingUnitCardRow(
                     "Max",
                     maxConsumption.first,
-                    value2 = maxConsumption.second.toString(), icon = Res.drawable.max_amount
+                    value2 = maxConsumption.second.toString(), icon = Res.drawable.max_amount,
+                    modifier = Modifier.clickable {
+                        viewModel.setChartDisplay(ChartDisplay.Monthly)
+                        viewModel.setSelector(selector, maxConsumption.first)
+                        if (!viewModel.isTwoPaneMode) {
+                            navHostController.navigate(Screens.ConsumptionScreen.name)
+                        }
+                    }
                 )
             }
             BillingUnitCardRow("Average", avgConsumption.toString(), icon = Res.drawable.avg_amount)

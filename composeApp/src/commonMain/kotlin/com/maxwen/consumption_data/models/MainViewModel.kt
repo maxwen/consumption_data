@@ -1,5 +1,8 @@
 package com.maxwen.consumption_data.models
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
@@ -46,14 +49,23 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
     private val _showYears = MutableStateFlow(mutableListOf<String>())
     val showYears: StateFlow<List<String>> = _showYears.asStateFlow()
 
+    private val _showServices = MutableStateFlow(mutableListOf<Service>())
+    val showServices: StateFlow<List<Service>> = _showServices.asStateFlow()
+
     private val _chartDisplay = MutableStateFlow(ChartDisplay.Yearly)
     val chartDisplay: StateFlow<ChartDisplay> = _chartDisplay.asStateFlow()
 
+    var focusPeriod = ""
+    private val _focusPeriodPosition = MutableStateFlow(0)
+    val focusPeriodPosition: StateFlow<Int> = _focusPeriodPosition.asStateFlow()
+
     var isTwoPaneMode = false
     var isShowYearsInit = false
+    var isShowServicesInit = false
 
     init {
         Settings.myDataStore = prefs
+
         viewModelScope.launch {
             startProgress()
 
@@ -99,6 +111,18 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
     fun setShowYears(showYears: List<String>) {
         this._showYears.update {
             showYears.toMutableList()
+        }
+    }
+
+    fun setShowServices(showServices: List<Service>) {
+        this._showServices.update {
+            showServices.toMutableList()
+        }
+    }
+
+    fun setFocusPeriodPosition(focusPeriodPosition: Int) {
+        this._focusPeriodPosition.update {
+            focusPeriodPosition
         }
     }
 
@@ -166,7 +190,8 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
     }
 
 
-    fun setSelector(selector: ConsumptionSelector) {
+    fun setSelector(selector: ConsumptionSelector, focusPeriod: String = "") {
+        this.focusPeriod = focusPeriod
         _selector.value = selector
     }
 
@@ -174,8 +199,12 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
         return data.getBillingUnits()
     }
 
-    fun getBillingUnitData(mscnumber: String): ServiceConfigurationBillingUnit? {
-        return data.getBillingUnitData(mscnumber)
+    fun getBillingUntitServices(billingUnits: List<ServiceConfigurationBillingUnit>): Set<Service> {
+        val set = mutableSetOf<Service>()
+        billingUnits.forEach { billingUnitData ->
+            set.addAll(getBillingUntitServices(billingUnitData.reference.mscnumber))
+        }
+        return set
     }
 
     fun getBillingUntitServices(mscnumber: String): Set<Service> {
