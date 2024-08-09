@@ -55,6 +55,7 @@ import kotlin.math.min
 fun ConsumptionScreen(
     viewModel: MainViewModel,
     navHostController: NavHostController,
+    focusPeriod: String,
     modifier: Modifier = Modifier
 ) {
     val selector by viewModel.selector.collectAsState()
@@ -83,12 +84,8 @@ fun ConsumptionScreen(
     val scrollState = rememberScrollState()
     val scrollPosition by viewModel.focusPeriodPosition.collectAsState()
 
-    LaunchedEffect(key1 = Unit) {
-        println("focusPeriod = " + viewModel.focusPeriod);
-        if (viewModel.focusPeriod.isNotEmpty()) {
-            println("scrollPosition = " + scrollPosition);
+    LaunchedEffect(key1 = scrollPosition) {
             scrollState.animateScrollTo(scrollPosition)
-        }
     }
 
     Column(

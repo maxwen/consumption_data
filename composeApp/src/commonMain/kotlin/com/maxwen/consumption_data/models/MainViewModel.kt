@@ -55,7 +55,9 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
     private val _chartDisplay = MutableStateFlow(ChartDisplay.Yearly)
     val chartDisplay: StateFlow<ChartDisplay> = _chartDisplay.asStateFlow()
 
-    var focusPeriod = ""
+    private val _focusPeriod = MutableStateFlow("")
+    val focusPeriod: StateFlow<String> = _focusPeriod.asStateFlow()
+
     private val _focusPeriodPosition = MutableStateFlow(0)
     val focusPeriodPosition: StateFlow<Int> = _focusPeriodPosition.asStateFlow()
 
@@ -191,8 +193,15 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
 
 
     fun setSelector(selector: ConsumptionSelector, focusPeriod: String = "") {
-        this.focusPeriod = focusPeriod
-        _selector.value = selector
+        _focusPeriodPosition.update {
+            0
+        }
+        _focusPeriod.update {
+            focusPeriod
+        }
+        _selector.update {
+            selector
+        }
     }
 
     fun getBillingUnits(): List<ServiceConfigurationBillingUnit> {

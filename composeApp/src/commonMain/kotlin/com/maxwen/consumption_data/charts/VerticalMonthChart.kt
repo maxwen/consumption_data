@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maxwen.consumption_data.charts.ChartProperties.Companion.chartHeaderHeight
 import com.maxwen.consumption_data.models.MainViewModel
 import com.maxwen.consumption_data.models.Period
 import com.maxwen.consumption_data.ui.PopupBox
@@ -56,16 +55,9 @@ fun VerticalMonthChart(
     var showMultiMonthPopup by rememberSaveable {
         mutableIntStateOf(0)
     }
-    val focusPeriod = viewModel.focusPeriod
 
     Column(
         modifier
-            .then(
-                if (years.size == 1 && focusPeriod.isNotEmpty() && years.contains(Period(focusPeriod).year()))
-                    Modifier.onGloballyPositioned { layoutCoordinates ->
-                        viewModel.setFocusPeriodPosition(layoutCoordinates.positionInRoot().y.toInt() - chartHeaderHeight)
-                    } else modifier
-            )
             .fillMaxWidth()
             .padding(top = 20.dp)
     ) {

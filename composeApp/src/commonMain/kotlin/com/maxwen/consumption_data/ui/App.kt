@@ -14,6 +14,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -66,6 +67,8 @@ fun App(
         ).toDp()
     }
 
+    val focusPeriod by viewModel.focusPeriod.collectAsState()
+
     Scaffold(modifier = Modifier
         .nestedScroll(scrollBehavior.nestedScrollConnection)
         .fillMaxSize(), topBar = {
@@ -99,7 +102,6 @@ fun App(
         ) {
             composable(route = Screens.BillingUnitsScreen.name) {
                 BoxWithConstraints {
-//                    println("maxWidth = " + maxWidth)
                     viewModel.isTwoPaneMode =
                         maxWidth > 800.dp /* TODO && getPlatform().type == PlatformType.Desktop*/
                     if (viewModel.isTwoPaneMode) {
@@ -115,6 +117,7 @@ fun App(
                             ConsumptionScreen(
                                 viewModel,
                                 navController,
+                                focusPeriod,
                                 modifier = Modifier
                                     .fillMaxHeight()
                                     .weight(0.5F)
@@ -135,6 +138,7 @@ fun App(
                 ConsumptionScreen(
                     viewModel,
                     navController,
+                    focusPeriod,
                     modifier = Modifier
                         .fillMaxSize()
                 )

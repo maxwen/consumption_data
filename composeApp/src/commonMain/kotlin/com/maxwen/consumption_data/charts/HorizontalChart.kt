@@ -1,8 +1,17 @@
 package com.maxwen.consumption_data.charts
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import com.maxwen.consumption_data.models.MainViewModel
 import com.maxwen.consumption_data.models.ChartDisplay
 import com.maxwen.consumption_data.models.ConsumptionEntity
@@ -18,6 +27,8 @@ fun HorizontalChart(
     showYears: List<String>
 ) {
     val chartDisplay by viewModel.chartDisplay.collectAsState()
+    val focusPeriod by viewModel.focusPeriod.collectAsState()
+    val scrollPosition by viewModel.focusPeriodPosition.collectAsState()
 
     val yearChart = YearChartData(
         service = selector.service,
@@ -77,12 +88,23 @@ fun HorizontalChart(
         )
 
         yearChart.sortedYears().forEach { year ->
-            HorizontalMonthChart(
-                viewModel,
-                monthChart,
-                listOf(year),
-                ChartProperties.maxBarHeightMonthly
-            )
+            Column(modifier = Modifier
+                .then(
+                    if (focusPeriod.isNotEmpty() && scrollPosition == 0 && year == Period(
+                            focusPeriod
+                        ).year()
+                    )
+                        Modifier.onGloballyPositioned { layoutCoordinates ->
+                            viewModel.setFocusPeriodPosition(layoutCoordinates.positionInParent().y.toInt())
+                        } else Modifier
+                )) {
+                HorizontalMonthChart(
+                    viewModel,
+                    monthChart,
+                    listOf(year),
+                    ChartProperties.maxBarHeightMonthly
+                )
+            }
         }
     }
 }

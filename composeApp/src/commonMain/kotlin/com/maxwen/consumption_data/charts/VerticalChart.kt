@@ -1,8 +1,12 @@
 package com.maxwen.consumption_data.charts
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import com.maxwen.consumption_data.models.MainViewModel
 import com.maxwen.consumption_data.models.ChartDisplay
 import com.maxwen.consumption_data.models.ConsumptionEntity
@@ -22,6 +26,8 @@ fun VerticalChart(
         unitOfMeassure = consumptions.first().unitofmeasure
     )
     val chartDisplay by viewModel.chartDisplay.collectAsState()
+    val focusPeriod by viewModel.focusPeriod.collectAsState()
+    val scrollPosition by viewModel.focusPeriodPosition.collectAsState()
 
     years.forEach { year ->
         if (showYears.contains(year)) {
@@ -73,11 +79,22 @@ fun VerticalChart(
         )
 
         yearChart.sortedYears().forEach { year ->
-            VerticalMonthChart(
-                viewModel,
-                monthChart,
-                listOf(year)
-            )
+            Column(modifier = Modifier
+                .then(
+                    if (focusPeriod.isNotEmpty() && scrollPosition == 0 && year == Period(
+                            focusPeriod
+                        ).year()
+                    )
+                        Modifier.onGloballyPositioned { layoutCoordinates ->
+                            viewModel.setFocusPeriodPosition(layoutCoordinates.positionInParent().y.toInt())
+                        } else Modifier
+                )) {
+                VerticalMonthChart(
+                    viewModel,
+                    monthChart,
+                    listOf(year)
+                )
+            }
         }
     }
 }
