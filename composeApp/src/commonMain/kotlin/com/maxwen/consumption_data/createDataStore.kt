@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import okio.Path.Companion.toPath
 
 fun createDataStore(producePath: () -> String): DataStore<Preferences> {
+    println("createDataStore path = " + producePath().toPath())
     return PreferenceDataStoreFactory.createWithPath(
         produceFile = { producePath().toPath() }
     )
