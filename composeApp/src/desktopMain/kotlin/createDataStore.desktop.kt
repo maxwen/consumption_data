@@ -2,6 +2,10 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.maxwen.consumption_data.DATA_STORE_FILE_NAME
 import com.maxwen.consumption_data.createDataStore
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.Foundation.NSDocumentDirectory
+import platform.Foundation.NSFileManager
+import platform.Foundation.NSUserDomainMask
 import java.io.File
 
 enum class PlatformTypeDesktop {
@@ -11,6 +15,7 @@ enum class PlatformTypeDesktop {
     Unknown
 }
 
+@OptIn(ExperimentalForeignApi::class)
 fun createDataStore(): DataStore<Preferences> {
     return createDataStore {
         when (getPlatformTypeDesktop(getPlatform())) {
@@ -30,13 +35,15 @@ fun createDataStore(): DataStore<Preferences> {
             }
 
             PlatformTypeDesktop.MacOS -> {
-                val configHome = File(
-                    System.getProperty("user.home"),
-                    "Library/Application Support"
-                ).absolutePath
-
+                val configHome = NSFileManager.defaultManager.URLForDirectory(
+                    directory = NSDocumentDirectory,
+                    inDomain = NSUserDomainMask,
+                    appropriateForURL = null,
+                    create = false,
+                    error = null
+                )
                 File(
-                    configHome,
+                    configHome.path,
                     File("ConsumptionData", DATA_STORE_FILE_NAME).path
                 ).absolutePath
             }
