@@ -55,7 +55,7 @@ fun AppBar(
             }
         },
         actions = {
-            if (currentScreen == Screens.BillingUnitsScreen || viewModel.isTwoPaneMode) {
+            if (currentScreen != Screens.SettingsScreen) {
                 IconButton(onClick = { viewModel.reload() }) {
                     Icon(
                         imageVector = Icons.Outlined.Refresh,
@@ -64,7 +64,7 @@ fun AppBar(
                 }
             }
 
-            if (currentScreen == Screens.ConsumptionScreen || viewModel.isTwoPaneMode) {
+            if (currentScreen != Screens.SettingsScreen) {
                 IconButton(onClick = {
                     if (chartStyle == ChartStyle.Vertical) viewModel.setChartStyle(
                         ChartStyle.Horizontal
