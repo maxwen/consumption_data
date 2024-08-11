@@ -1,13 +1,12 @@
-import platform.UIKit.UIDevice
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
-class IOSPlatform: Platform {
-    override val name: String = UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
-    override val type: PlatformType = PlatformType.iOS
+class JVMPlatform : Platform {
+    override val name: String = "Java ${System.getProperty("java.version")}"
+    override val type: PlatformType = PlatformType.Desktop
 }
 
-actual fun getPlatform(): Platform = IOSPlatform()
+actual fun getPlatform(): Platform = JVMPlatform()
 
 @OptIn(ExperimentalEncodingApi::class)
 actual fun encode(text: String): String {

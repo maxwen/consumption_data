@@ -2,6 +2,8 @@ package com.maxwen.consumption_data.models
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
+import decode
+import encode
 import kotlinx.coroutines.flow.first
 
 enum class ChartStyle {
@@ -56,7 +58,7 @@ object Settings {
     suspend fun setUsername(value: String) {
         Result.runCatching {
             myDataStore.edit { settings ->
-                settings[USERNAME] = value
+                settings[USERNAME] = encode(value)
             }
         }
     }
@@ -64,13 +66,13 @@ object Settings {
     suspend fun getUsername(): String {
         val settings = myDataStore.data.first().toPreferences()
         val value = settings[USERNAME] ?: ""
-        return value
+        return decode(value)
     }
 
     suspend fun setPassword(value: String) {
         Result.runCatching {
             myDataStore.edit { settings ->
-                settings[PASSWORD] = value
+                settings[PASSWORD] = encode(value)
             }
         }
     }
@@ -78,7 +80,7 @@ object Settings {
     suspend fun getPasword(): String {
         val settings = myDataStore.data.first().toPreferences()
         val value = settings[PASSWORD] ?: ""
-        return value
+        return decode(value)
     }
 
     suspend fun setChartStyle(chartStyle: ChartStyle) {
