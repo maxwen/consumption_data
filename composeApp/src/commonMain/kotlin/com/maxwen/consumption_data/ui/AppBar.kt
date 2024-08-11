@@ -62,30 +62,27 @@ fun AppBar(
                         contentDescription = "Refresh"
                     )
                 }
-            }
 
-            if (currentScreen != Screens.SettingsScreen) {
-                IconButton(onClick = {
-                    if (chartStyle == ChartStyle.Vertical) viewModel.setChartStyle(
-                        ChartStyle.Horizontal
-                    ) else viewModel.setChartStyle(ChartStyle.Vertical)
-                }) {
-                    if (chartStyle == ChartStyle.Horizontal) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.bar_chart),
-                            contentDescription = "Horizontal"
-                        )
-                    } else {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.bar_chart),
-                            contentDescription = "Vertical",
-                            modifier = Modifier.rotate(90F)
-                        )
-                    }
-                }
-            }
 
-            if (currentScreen != Screens.SettingsScreen) {
+//                IconButton(onClick = {
+//                    if (chartStyle == ChartStyle.Vertical) viewModel.setChartStyle(
+//                        ChartStyle.Horizontal
+//                    ) else viewModel.setChartStyle(ChartStyle.Vertical)
+//                }) {
+//                    if (chartStyle == ChartStyle.Horizontal) {
+//                        Icon(
+//                            imageVector = vectorResource(Res.drawable.bar_chart),
+//                            contentDescription = "Horizontal"
+//                        )
+//                    } else {
+//                        Icon(
+//                            imageVector = vectorResource(Res.drawable.bar_chart),
+//                            contentDescription = "Vertical",
+//                            modifier = Modifier.rotate(90F)
+//                        )
+//                    }
+//                }
+
                 IconButton(onClick = { navHostController.navigate(Screens.SettingsScreen.name) }) {
                     Icon(
                         imageVector = Icons.Outlined.Settings,

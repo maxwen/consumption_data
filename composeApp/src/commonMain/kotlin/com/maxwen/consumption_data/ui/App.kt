@@ -105,24 +105,27 @@ fun App(
                     viewModel.isTwoPaneMode =
                         maxWidth > 800.dp /* TODO && getPlatform().type == PlatformType.Desktop*/
                     if (viewModel.isTwoPaneMode) {
+                        val loaded by viewModel.loaded.collectAsState()
                         Row {
                             BillingUnitsScreen(
                                 viewModel,
                                 navController,
-                                modifier = Modifier
+                                modifier = if (loaded) Modifier
                                     .fillMaxHeight()
-                                    .weight(0.5F)
+                                    .weight(0.5F) else Modifier
+                                    .fillMaxSize()
                             )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            ConsumptionScreen(
-                                viewModel,
-                                navController,
-                                focusPeriod,
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .weight(0.5F)
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
+                            if (loaded) {
+                                ConsumptionScreen(
+                                    viewModel,
+                                    navController,
+                                    focusPeriod,
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .weight(0.5F)
+                                        .padding(start = 10.dp, end = 10.dp)
+                                )
+                            }
                         }
                     } else {
                         BillingUnitsScreen(
