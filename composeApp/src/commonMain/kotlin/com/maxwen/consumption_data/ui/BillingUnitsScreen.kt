@@ -50,115 +50,119 @@ fun BillingUnitsScreen(
     } else if (progress) {
         Progress()
     } else if (loaded) {
-        Column(
-            modifier = modifier.verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            val billingUntits = viewModel.getBillingUnits()
-            val services = mutableListOf<Service>()
-            services.addAll(
-                viewModel.getBillingUntitServices(billingUntits).sortedBy { it.toString() })
-            if (!viewModel.isShowServicesInit && services.isNotEmpty()) {
-                viewModel.setShowServices(
-                    services
-                )
-                viewModel.isShowServicesInit = true
-            }
-            val showServices by viewModel.showServices.collectAsState()
-            val showServicesCopy = mutableListOf<Service>()
-            showServicesCopy.addAll(showServices)
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Spacer(modifier = Modifier.width(10.dp))
-
-                for (service in services) {
-                    val inShowServices = showServicesCopy.contains(service)
-                    Button(
-                        contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
-                        shape = if (inShowServices) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
-                        colors = if (inShowServices) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
-                        elevation = if (inShowServices) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
-                        onClick = {
-                            if (showServicesCopy.contains(service)) {
-                                showServicesCopy.remove(service)
-                            } else {
-                                showServicesCopy.add(service)
-                                showServicesCopy.sort()
-                            }
-                            viewModel.setShowServices(showServicesCopy)
-                        }) {
-                        Icon(
-                            imageVector = vectorResource(service.icon()),
-                            contentDescription = service.toString()
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(10.dp))
+        if (viewModel.getBillingUnits().isEmpty()) {
+            EmptyUnitsScreen(viewModel, navHostController, modifier)
+        } else {
+            Column(
+                modifier = modifier.verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                val billingUntits = viewModel.getBillingUnits()
+                val services = mutableListOf<Service>()
+                services.addAll(
+                    viewModel.getBillingUntitServices(billingUntits).sortedBy { it.toString() })
+                if (!viewModel.isShowServicesInit && services.isNotEmpty()) {
+                    viewModel.setShowServices(
+                        services
+                    )
+                    viewModel.isShowServicesInit = true
                 }
-            }
-            billingUntits.forEach { billingUnit ->
-                val serviceStart = billingUnit.servicestart
-                val lastUpdate = billingUnit.lastperiod
-                if (serviceStart != null && lastUpdate != null) {
+                val showServices by viewModel.showServices.collectAsState()
+                val showServicesCopy = mutableListOf<Service>()
+                showServicesCopy.addAll(showServices)
 
-                    // TODO here we can limit to max years before
-                    val periodStart =
-                        Period.make((Period(lastUpdate).yearInt() - 1).toString(), 1).period
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Spacer(modifier = Modifier.width(10.dp))
 
-                    viewModel.getBillingUntitServices(billingUnit.reference.mscnumber)
-                        .filter { showServices.contains(it) }.forEach { service ->
-                            if (showServices.contains(service)) {
-                                val unitOfMeasureSet =
-                                    viewModel.getBillingUnitServicesUnitOfMeasure(
-                                        billingUnit.reference.mscnumber,
-                                        service
-                                    )
-                                unitOfMeasureSet.forEach { unitOfMeasure ->
-                                    if (squashResidentialUnits) {
-                                        val selector =
-                                            ConsumptionSelector(
-                                                billingUnit.reference,
-                                                service,
-                                                unitOfMeasure,
-                                                null,
-                                                periodStart = serviceStart
-                                            )
+                    for (service in services) {
+                        val inShowServices = showServicesCopy.contains(service)
+                        Button(
+                            contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
+                            shape = if (inShowServices) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+                            colors = if (inShowServices) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+                            elevation = if (inShowServices) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+                            onClick = {
+                                if (showServicesCopy.contains(service)) {
+                                    showServicesCopy.remove(service)
+                                } else {
+                                    showServicesCopy.add(service)
+                                    showServicesCopy.sort()
+                                }
+                                viewModel.setShowServices(showServicesCopy)
+                            }) {
+                            Icon(
+                                imageVector = vectorResource(service.icon()),
+                                contentDescription = service.toString()
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                    }
+                }
+                billingUntits.forEach { billingUnit ->
+                    val serviceStart = billingUnit.servicestart
+                    val lastUpdate = billingUnit.lastperiod
+                    if (serviceStart != null && lastUpdate != null) {
 
-                                        BillingUnitCard(
-                                            viewModel,
-                                            navHostController,
-                                            billingUnit,
-                                            selector
+                        // TODO here we can limit to max years before
+                        val periodStart =
+                            Period.make((Period(lastUpdate).yearInt() - 1).toString(), 1).period
+
+                        viewModel.getBillingUntitServices(billingUnit.reference.mscnumber)
+                            .filter { showServices.contains(it) }.forEach { service ->
+                                if (showServices.contains(service)) {
+                                    val unitOfMeasureSet =
+                                        viewModel.getBillingUnitServicesUnitOfMeasure(
+                                            billingUnit.reference.mscnumber,
+                                            service
                                         )
-                                    } else {
-                                        viewModel.getBillingUntitResidentialUnits(billingUnit.reference.mscnumber)
-                                            .forEach { residentialUnit ->
-                                                val selector =
-                                                    ConsumptionSelector(
-                                                        billingUnit.reference,
-                                                        service,
-                                                        unitOfMeasure,
-                                                        residentialUnit,
-                                                        periodStart = serviceStart
-                                                    )
-
-                                                BillingUnitCard(
-                                                    viewModel,
-                                                    navHostController,
-                                                    billingUnit,
-                                                    selector
+                                    unitOfMeasureSet.forEach { unitOfMeasure ->
+                                        if (squashResidentialUnits) {
+                                            val selector =
+                                                ConsumptionSelector(
+                                                    billingUnit.reference,
+                                                    service,
+                                                    unitOfMeasure,
+                                                    null,
+                                                    periodStart = serviceStart
                                                 )
-                                            }
+
+                                            BillingUnitCard(
+                                                viewModel,
+                                                navHostController,
+                                                billingUnit,
+                                                selector
+                                            )
+                                        } else {
+                                            viewModel.getBillingUntitResidentialUnits(billingUnit.reference.mscnumber)
+                                                .forEach { residentialUnit ->
+                                                    val selector =
+                                                        ConsumptionSelector(
+                                                            billingUnit.reference,
+                                                            service,
+                                                            unitOfMeasure,
+                                                            residentialUnit,
+                                                            periodStart = serviceStart
+                                                        )
+
+                                                    BillingUnitCard(
+                                                        viewModel,
+                                                        navHostController,
+                                                        billingUnit,
+                                                        selector
+                                                    )
+                                                }
+                                        }
                                     }
                                 }
                             }
-                        }
+                    }
                 }
-            }
-            Spacer(
-                Modifier.windowInsetsBottomHeight(
-                    WindowInsets.navigationBars
+                Spacer(
+                    Modifier.windowInsetsBottomHeight(
+                        WindowInsets.navigationBars
+                    )
                 )
-            )
+            }
         }
     } else if (loadError) {
         LoadErrorScreen(viewModel, navHostController, modifier)

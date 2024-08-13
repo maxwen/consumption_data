@@ -100,9 +100,7 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
                 setSelector(ConsumptionSelector())
                 _loaded.update { true }
             } catch (e: Throwable) {
-                if (isConfigComplete.value) {
-                    _loadError.update { true }
-                }
+                _loadError.update { true }
                 _loaded.update { false }
             } finally {
                 stopProgress()

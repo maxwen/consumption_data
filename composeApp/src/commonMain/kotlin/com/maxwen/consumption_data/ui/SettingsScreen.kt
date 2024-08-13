@@ -1,8 +1,12 @@
 package com.maxwen.consumption_data.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -26,6 +30,8 @@ import com.maxwen.consumption_data.models.MainViewModel
 import consumption_data.composeapp.generated.resources.Res
 import consumption_data.composeapp.generated.resources.eye_off_outline
 import consumption_data.composeapp.generated.resources.eye_outline
+import consumption_data.composeapp.generated.resources.get_credentials_activity_header
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
@@ -36,7 +42,6 @@ fun SettingsScreen(
 ) {
     Column(
         modifier = modifier.padding(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val baseUrl by viewModel.baseurl.collectAsState()
         val username by viewModel.username.collectAsState()
@@ -62,6 +67,11 @@ fun SettingsScreen(
                 viewModel.setBaseUrl(it)
             },
             label = { Text("Url") })
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            stringResource(Res.string.get_credentials_activity_header),
+        )
+        Spacer(modifier = Modifier.height(10.dp))
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = username,
@@ -92,20 +102,40 @@ fun SettingsScreen(
             visualTransformation = if (passwordVisibility) VisualTransformation.None
             else PasswordVisualTransformation()
         )
-        if (!isConfigComplete) {
-            Text("Please fill all config blabla", modifier = Modifier.padding(top = 10.dp))
-        } else {
-            Button(modifier = Modifier.padding(top = 10.dp), onClick = {
-                viewModel.reload()
-                testDone = true
+
+        Spacer(modifier = Modifier.height(20.dp))
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Spacer(modifier = Modifier.width(20.dp))
+            Button(onClick = {
+                viewModel.setPassword("")
+                viewModel.setUsername("")
             }) {
-                Text("Test")
+                Text("Reset")
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            if (isConfigComplete) {
+                Button(onClick = {
+                    viewModel.reload()
+                    testDone = true
+                }) {
+                    Text("Test")
+                }
+                Spacer(modifier = Modifier.width(20.dp))
+            }
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (!isConfigComplete) {
+                Text("Please fill all config blabla")
             }
             if (testDone) {
                 if (loadError) {
-                    Text("Load error", modifier = Modifier.padding(top = 10.dp))
+                    Text("Load error")
                 } else if (loaded) {
-                    Text("Load Ok", modifier = Modifier.padding(top = 10.dp))
+                    Text("Load Ok")
                 }
             }
         }
