@@ -46,9 +46,7 @@ fun SettingsScreen(
         val baseUrl by viewModel.baseurl.collectAsState()
         val username by viewModel.username.collectAsState()
         val password by viewModel.password.collectAsState()
-        val loaded by viewModel.loaded.collectAsState()
-        val loadError by viewModel.loadError.collectAsState()
-        val isConfigComplete by viewModel.isConfigComplete.collectAsState()
+        val dataState by viewModel.dataState.collectAsState()
         var testDone by remember {
             mutableStateOf(false)
         }
@@ -113,7 +111,7 @@ fun SettingsScreen(
                 Text("Reset")
             }
             Spacer(modifier = Modifier.weight(1f))
-            if (isConfigComplete) {
+            if (dataState.isConfigComplete) {
                 Button(onClick = {
                     viewModel.reload()
                     testDone = true
@@ -128,13 +126,13 @@ fun SettingsScreen(
             modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (!isConfigComplete) {
+            if (!dataState.isConfigComplete) {
                 Text("Please fill all config blabla")
             }
             if (testDone) {
-                if (loadError) {
+                if (dataState.loadError) {
                     Text("Load error")
-                } else if (loaded) {
+                } else if (dataState.loaded) {
                     Text("Load Ok")
                 }
             }

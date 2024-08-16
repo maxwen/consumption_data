@@ -26,9 +26,7 @@ fun HorizontalChart(
     years: List<String>,
     showYears: List<String>
 ) {
-    val chartDisplay by viewModel.chartDisplay.collectAsState()
-    val focusPeriod by viewModel.focusPeriod.collectAsState()
-    val scrollPosition by viewModel.focusPeriodPosition.collectAsState()
+    val graphState by viewModel.graphState.collectAsState()
 
     val yearChart = YearChartData(
         service = selector.service,
@@ -54,11 +52,9 @@ fun HorizontalChart(
         }
     }
 
-    if (chartDisplay == ChartDisplay.Yearly) {
+    if (graphState.display == ChartDisplay.Yearly) {
         HorizontalYearChart(yearChart)
-    }
-
-    if (chartDisplay == ChartDisplay.Monthly) {
+    } else {
         val monthChart = MonthChartData(
             service = selector.service,
             unitOfMeassure = consumptions.first().unitofmeasure
@@ -90,8 +86,8 @@ fun HorizontalChart(
         yearChart.sortedYears().forEach { year ->
             Column(modifier = Modifier
                 .then(
-                    if (focusPeriod.isNotEmpty() && scrollPosition == 0 && year == Period(
-                            focusPeriod
+                    if (graphState.focusPeriod.isNotEmpty() && graphState.focusPeriodPosition == 0 && year == Period(
+                            graphState.focusPeriod
                         ).year()
                     )
                         Modifier.onGloballyPositioned { layoutCoordinates ->

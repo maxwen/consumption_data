@@ -99,6 +99,7 @@ fun BillingUnitCard(
                     minConsumption.first,
                     value2 = minConsumption.second.toString(), icon = Res.drawable.min_amount,
                     modifier = Modifier.clickable {
+                        // TODO should make sure year is in showYears
                         viewModel.setChartDisplay(ChartDisplay.Monthly)
                         viewModel.setSelector(selector, minConsumption.first)
                         if (!viewModel.isTwoPaneMode) {
@@ -113,6 +114,7 @@ fun BillingUnitCard(
                     maxConsumption.first,
                     value2 = maxConsumption.second.toString(), icon = Res.drawable.max_amount,
                     modifier = Modifier.clickable {
+                        // TODO should make sure year is in showYears
                         viewModel.setChartDisplay(ChartDisplay.Monthly)
                         viewModel.setSelector(selector, maxConsumption.first)
                         if (!viewModel.isTwoPaneMode) {

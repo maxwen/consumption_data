@@ -88,7 +88,11 @@ fun HorizontalBar(
                 ) {
                     if (showAmount && amountInline) {
                         Spacer(modifier = Modifier.weight(1.0F))
-                        Text(amount.toString(), modifier = Modifier.padding(end = 5.dp))
+                        Text(
+                            amount.toString(),
+                            modifier = Modifier.padding(end = 5.dp),
+                            color = Color.White
+                        )
                     }
                 }
                 if (showAmount && !amountInline) {

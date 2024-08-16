@@ -1,15 +1,15 @@
 package com.maxwen.consumption_data.models
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.update
 import org.openapitools.client.models.ResidentialUnitReference
@@ -23,9 +23,10 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
     }
 
     private val _loaded = MutableStateFlow(false)
-    val loaded: StateFlow<Boolean> = _loaded.asStateFlow()
     private val _loadError = MutableStateFlow(false)
-    val loadError: StateFlow<Boolean> = _loadError.asStateFlow()
+    private val _isSetupDone = MutableStateFlow(true)
+    private val _isConfigComplete = MutableStateFlow(false)
+
     private val _progress = MutableStateFlow(false)
     val progress: StateFlow<Boolean> = _progress.asStateFlow()
 
@@ -38,32 +39,49 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
     val password = MutableStateFlow("")
     val username = MutableStateFlow("")
     val baseurl = MutableStateFlow("")
-    private val _isSetupDone = MutableStateFlow(true)
-    val isSetupDone: StateFlow<Boolean> = _isSetupDone.asStateFlow()
-    private val _isConfigComplete = MutableStateFlow(false)
-    val isConfigComplete: StateFlow<Boolean> = _isConfigComplete.asStateFlow()
-
-    private val _chartStyle = MutableStateFlow(ChartStyle.Vertical)
-    val chartStyle: StateFlow<ChartStyle> = _chartStyle.asStateFlow()
-
-    private val _showYears = MutableStateFlow(mutableListOf<String>())
-    val showYears: StateFlow<List<String>> = _showYears.asStateFlow()
 
     private val _showServices = MutableStateFlow(mutableListOf<Service>())
     val showServices: StateFlow<List<Service>> = _showServices.asStateFlow()
 
+    private val _chartStyle = MutableStateFlow(ChartStyle.Vertical)
+    private val _showYears = MutableStateFlow(mutableListOf<String>())
     private val _chartDisplay = MutableStateFlow(ChartDisplay.Yearly)
-    val chartDisplay: StateFlow<ChartDisplay> = _chartDisplay.asStateFlow()
-
     private val _focusPeriod = MutableStateFlow("")
-    val focusPeriod: StateFlow<String> = _focusPeriod.asStateFlow()
-
     private val _focusPeriodPosition = MutableStateFlow(0)
-    val focusPeriodPosition: StateFlow<Int> = _focusPeriodPosition.asStateFlow()
 
     var isTwoPaneMode = false
     var isShowYearsInit = false
     var isShowServicesInit = false
+
+    val dataState = combine(
+        _loaded,
+        _loadError,
+        _isSetupDone,
+        _isConfigComplete
+    ) { loaded, loadError, isSetupDone, isConfigComplete ->
+        DataState(loaded, loadError, isSetupDone, isConfigComplete)
+    }.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(300), DataState(
+            loaded = false,
+            loadError = false,
+            isSetupDone = false,
+            isConfigComplete = false
+        )
+    )
+
+    val graphState = combine(
+        _chartStyle,
+        _chartDisplay,
+        _showYears,
+        _focusPeriod,
+        _focusPeriodPosition
+    ) { chartStyle, chartDisplay, showYears, focusPeriod, focusPeriodPosition ->
+        GraphState(chartStyle, chartDisplay, showYears, focusPeriod, focusPeriodPosition)
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(300),
+        GraphState(ChartStyle.Vertical, ChartDisplay.Yearly, listOf(), "", 0)
+    )
 
     init {
         Settings.myDataStore = prefs
@@ -82,7 +100,7 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
                 data.load(baseurl.value, username.value, password.value)
                 _loaded.update { true }
             } catch (e: Throwable) {
-                if (isConfigComplete.value) {
+                if (_isConfigComplete.value) {
                     _loadError.update { true }
                 }
             } finally {
@@ -143,10 +161,6 @@ class MainViewModel(prefs: DataStore<Preferences>) : ViewModel() {
 
     private fun stopProgress() {
         _progress.update { false }
-    }
-
-    fun resetLoadError() {
-        _loadError.update { false }
     }
 
     private fun setSetupDone() {

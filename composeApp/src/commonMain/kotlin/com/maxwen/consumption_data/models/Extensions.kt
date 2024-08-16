@@ -45,3 +45,4 @@ fun Service.icon(): DrawableResource {
         }
     }
 }
+

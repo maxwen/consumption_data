@@ -36,7 +36,7 @@ fun AppBar(
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val chartStyle by viewModel.chartStyle.collectAsState()
+//    val graphState by viewModel.graphState.collectAsState()
 
     TopAppBar(
         title = { Text(text = stringResource(currentScreen.title)) },

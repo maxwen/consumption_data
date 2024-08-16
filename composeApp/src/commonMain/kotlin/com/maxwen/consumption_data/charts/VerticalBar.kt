@@ -144,10 +144,10 @@ fun VerticalBar(
                                     overflow = TextOverflow.Visible,
                                     style = TextStyle(
                                         fontSize = fontSize,
-                                        color = textColor,
+                                        color = Color.White,
                                         textAlign = TextAlign.Center,
                                     ),
-                                    topLeft = Offset(x = 0f, y = yOffset)
+                                    topLeft = Offset(x = 0f, y = yOffset),
                                 )
                             }
                         }

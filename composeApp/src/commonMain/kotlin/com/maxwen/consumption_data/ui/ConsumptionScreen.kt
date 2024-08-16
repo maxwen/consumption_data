@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -55,7 +56,6 @@ import kotlin.math.min
 fun ConsumptionScreen(
     viewModel: MainViewModel,
     navHostController: NavHostController,
-    focusPeriod: String,
     modifier: Modifier = Modifier
 ) {
     val selector by viewModel.selector.collectAsState()
@@ -71,21 +71,19 @@ fun ConsumptionScreen(
         viewModel.isShowYearsInit = true
     }
 
-    val chartStyle by viewModel.chartStyle.collectAsState()
-    val chartDisplay by viewModel.chartDisplay.collectAsState()
-    val showYears by viewModel.showYears.collectAsState()
+    val graphState by viewModel.graphState.collectAsState()
+
     val showYearsCopy = mutableListOf<String>()
-    showYearsCopy.addAll(showYears)
+    showYearsCopy.addAll(graphState.showYears)
     var showYearPopup by rememberSaveable {
         mutableStateOf(false)
     }
     val yearColors = ChartProperties.yearColors
 
     val scrollState = rememberScrollState()
-    val scrollPosition by viewModel.focusPeriodPosition.collectAsState()
 
-    LaunchedEffect(key1 = scrollPosition) {
-            scrollState.animateScrollTo(scrollPosition)
+    LaunchedEffect(key1 = graphState.focusPeriodPosition) {
+            scrollState.animateScrollTo(graphState.focusPeriodPosition)
     }
 
     Column(
@@ -124,9 +122,9 @@ fun ConsumptionScreen(
         Row(modifier = Modifier.fillMaxWidth()) {
             Button(
                 contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
-                shape = if (chartDisplay == ChartDisplay.Yearly) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
-                colors = if (chartDisplay == ChartDisplay.Yearly) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
-                elevation = if (chartDisplay == ChartDisplay.Yearly) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+                shape = if (graphState.display == ChartDisplay.Yearly) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+                colors = if (graphState.display == ChartDisplay.Yearly) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+                elevation = if (graphState.display == ChartDisplay.Yearly) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
                 onClick = { viewModel.setChartDisplay(ChartDisplay.Yearly) }) {
 //                Text(
 //                    "Yearly",
@@ -139,9 +137,9 @@ fun ConsumptionScreen(
             Spacer(modifier = Modifier.width(5.dp))
             Button(
                 contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
-                shape = if (chartDisplay == ChartDisplay.Monthly) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
-                colors = if (chartDisplay == ChartDisplay.Monthly) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
-                elevation = if (chartDisplay == ChartDisplay.Monthly) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+                shape = if (graphState.display == ChartDisplay.Monthly) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+                colors = if (graphState.display == ChartDisplay.Monthly) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+                elevation = if (graphState.display == ChartDisplay.Monthly) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
                 onClick = { viewModel.setChartDisplay(ChartDisplay.Monthly) }) {
 //                Text(
 //                    "Monthly",
@@ -154,9 +152,9 @@ fun ConsumptionScreen(
             Spacer(modifier = Modifier.weight(1f))
             Button(
                 contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
-                shape = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
-                colors = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
-                elevation = if (chartStyle == ChartStyle.Vertical) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+                shape = if (graphState.style == ChartStyle.Vertical) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+                colors = if (graphState.style == ChartStyle.Vertical) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+                elevation = if (graphState.style == ChartStyle.Vertical) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
                 onClick = { viewModel.setChartStyle(ChartStyle.Vertical) }) {
                 Icon(
                     imageVector = vectorResource(Res.drawable.bar_chart),
@@ -166,9 +164,9 @@ fun ConsumptionScreen(
             Spacer(modifier = Modifier.width(10.dp))
             Button(
                 contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
-                shape = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
-                colors = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
-                elevation = if (chartStyle == ChartStyle.Horizontal) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
+                shape = if (graphState.style == ChartStyle.Horizontal) ButtonDefaults.shape else ButtonDefaults.filledTonalShape,
+                colors = if (graphState.style == ChartStyle.Horizontal) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors(),
+                elevation = if (graphState.style == ChartStyle.Horizontal) ButtonDefaults.buttonElevation() else ButtonDefaults.filledTonalButtonElevation(),
                 onClick = { viewModel.setChartStyle(ChartStyle.Horizontal) }) {
                 Icon(
                     imageVector = vectorResource(Res.drawable.bar_chart),
@@ -214,6 +212,7 @@ fun ConsumptionScreen(
                     }) {
                     Text(
                         year,
+                        color = Color.White
                     )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
@@ -298,15 +297,15 @@ fun ConsumptionScreen(
             }
         }
 
-        if (showYears.isNotEmpty()) {
+        if (graphState.showYears.isNotEmpty()) {
             ConsumptionYearsScreen(
                 viewModel,
                 navHostController,
                 selector,
                 consumptions,
-                chartStyle,
+                graphState.style,
                 years,
-                showYears,
+                graphState.showYears,
             )
         }
         Spacer(

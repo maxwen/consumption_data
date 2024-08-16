@@ -60,6 +60,7 @@ kotlin {
             implementation(libs.ktor.client.android)
             api(libs.moko.permissions)
             api(libs.moko.permissions.compose)
+            implementation(libs.core.splashscreen)
             implementation("io.github.osipxd:security-crypto-datastore-preferences:1.1.1-beta03")
         }
         commonMain.dependencies {

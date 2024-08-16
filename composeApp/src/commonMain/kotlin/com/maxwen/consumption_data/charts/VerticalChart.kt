@@ -25,9 +25,7 @@ fun VerticalChart(
         service = selector.service,
         unitOfMeassure = consumptions.first().unitofmeasure
     )
-    val chartDisplay by viewModel.chartDisplay.collectAsState()
-    val focusPeriod by viewModel.focusPeriod.collectAsState()
-    val scrollPosition by viewModel.focusPeriodPosition.collectAsState()
+    val graphState by viewModel.graphState.collectAsState()
 
     years.forEach { year ->
         if (showYears.contains(year)) {
@@ -47,11 +45,9 @@ fun VerticalChart(
             )
         }
     }
-    if (chartDisplay == ChartDisplay.Yearly) {
+    if (graphState.display == ChartDisplay.Yearly) {
         VerticalYearChart(yearChart)
-    }
-
-    if (chartDisplay == ChartDisplay.Monthly) {
+    } else {
         val monthChart = MonthChartData(
             service = selector.service,
             unitOfMeassure = consumptions.first().unitofmeasure
@@ -81,8 +77,8 @@ fun VerticalChart(
         yearChart.sortedYears().forEach { year ->
             Column(modifier = Modifier
                 .then(
-                    if (focusPeriod.isNotEmpty() && scrollPosition == 0 && year == Period(
-                            focusPeriod
+                    if (graphState.focusPeriod.isNotEmpty() && graphState.focusPeriodPosition == 0 && year == Period(
+                            graphState.focusPeriod
                         ).year()
                     )
                         Modifier.onGloballyPositioned { layoutCoordinates ->

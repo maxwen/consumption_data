@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import android.graphics.Color
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -18,6 +19,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import com.maxwen.consumption_data.models.MainViewModel
 import com.maxwen.consumption_data.ui.App
+import com.maxwen.consumption_data.ui.theme.AndroidAppTheme
 import com.maxwen.consumption_data.ui.theme.AppTheme
 import dev.icerock.moko.permissions.DeniedAlwaysException
 import dev.icerock.moko.permissions.DeniedException
@@ -33,11 +35,12 @@ class MainActivity() : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
 
         enableEdgeToEdge()
 
         setContent {
-            AppTheme {
+            AndroidAppTheme {
                 val factory = rememberPermissionsControllerFactory()
                 val controller = remember(factory) {
                     factory.createPermissionsController()

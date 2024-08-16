@@ -12,11 +12,8 @@ import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,7 +27,6 @@ import com.maxwen.consumption_data.models.Period
 import com.maxwen.consumption_data.models.icon
 import org.jetbrains.compose.resources.vectorResource
 import org.openapitools.client.models.Service
-import kotlin.math.min
 
 @Composable
 fun BillingUnitsScreen(
@@ -38,18 +34,15 @@ fun BillingUnitsScreen(
     navHostController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val loaded by viewModel.loaded.collectAsState()
-    val loadError by viewModel.loadError.collectAsState()
-    val isSetupDone by viewModel.isSetupDone.collectAsState()
     val progress by viewModel.progress.collectAsState()
-
+    val dataState by viewModel.dataState.collectAsState()
     val squashResidentialUnits by viewModel.squashResidentialUnits.collectAsState()
 
-    if (!isSetupDone) {
+    if (!dataState.isSetupDone) {
         SetupScreen(viewModel, navHostController, modifier)
     } else if (progress) {
         Progress()
-    } else if (loaded) {
+    } else if (dataState.loaded) {
         if (viewModel.getBillingUnits().isEmpty()) {
             EmptyUnitsScreen(viewModel, navHostController, modifier)
         } else {
@@ -164,7 +157,7 @@ fun BillingUnitsScreen(
                 )
             }
         }
-    } else if (loadError) {
+    } else if (dataState.loadError) {
         LoadErrorScreen(viewModel, navHostController, modifier)
     } else {
         //back from setgtings without test

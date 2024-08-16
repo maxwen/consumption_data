@@ -2,13 +2,11 @@ package com.maxwen.consumption_data.ui
 
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
@@ -67,7 +65,7 @@ fun App(
         ).toDp()
     }
 
-    val focusPeriod by viewModel.focusPeriod.collectAsState()
+    val graphState by viewModel.graphState.collectAsState()
 
     Scaffold(modifier = Modifier
         .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -105,21 +103,20 @@ fun App(
                     viewModel.isTwoPaneMode =
                         maxWidth > 800.dp /* TODO && getPlatform().type == PlatformType.Desktop*/
                     if (viewModel.isTwoPaneMode) {
-                        val loaded by viewModel.loaded.collectAsState()
+                        val uiState by viewModel.dataState.collectAsState()
                         Row {
                             BillingUnitsScreen(
                                 viewModel,
                                 navController,
-                                modifier = if (loaded) Modifier
+                                modifier = if (uiState.loaded) Modifier
                                     .fillMaxHeight()
                                     .weight(0.5F) else Modifier
                                     .fillMaxSize()
                             )
-                            if (loaded) {
+                            if (uiState.loaded) {
                                 ConsumptionScreen(
                                     viewModel,
                                     navController,
-                                    focusPeriod,
                                     modifier = Modifier
                                         .fillMaxHeight()
                                         .weight(0.5F)
@@ -141,7 +138,6 @@ fun App(
                 ConsumptionScreen(
                     viewModel,
                     navController,
-                    focusPeriod,
                     modifier = Modifier
                         .fillMaxSize()
                 )
